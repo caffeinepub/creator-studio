@@ -1,0 +1,119 @@
+{
+  "kind": "build_request",
+  "title": "Create TikTok-style video sharing platform with owner-only uploads",
+  "projectName": "Creator Studio",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement owner authentication using Internet Identity to restrict video uploads to a single authorized user",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "only I can upload my videos"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Owner can authenticate using Internet Identity",
+        "Only authenticated owner principal can access upload functionality",
+        "Unauthenticated users can view videos but cannot upload"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Create video upload functionality that accepts video files, stores them in stable memory, and associates them with metadata (title, description, upload timestamp)",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "I can upload my videos"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend accepts video file uploads from authenticated owner",
+        "Videos are stored persistently in stable memory",
+        "Each video includes title, description, and timestamp metadata",
+        "Upload endpoint validates owner identity before accepting videos"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Build a TikTok-style profile page displaying the creator's profile information including profile picture, username, bio, and video count statistics",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "my tiktokish profile"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Profile page displays creator profile picture",
+        "Profile shows username and bio text",
+        "Video count statistic is visible",
+        "Layout follows TikTok-style vertical profile design"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Create a video feed interface where fans can browse and watch uploaded videos in a scrollable grid or vertical feed layout",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "for my fans to watch"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Videos display in a browsable feed/grid layout",
+        "Clicking a video opens a player view",
+        "Video player supports play/pause controls",
+        "Feed is accessible to all users without authentication"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Design and implement a cohesive visual theme with bold, vibrant colors (avoiding blue and purple), modern typography, and smooth animations that create an engaging social media aesthetic throughout the application",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Consistent color palette applied across all pages",
+        "Typography hierarchy supports readability and brand identity",
+        "Smooth transitions and animations enhance user experience",
+        "Visual style feels modern and social-media-oriented"
+      ]
+    }
+  ],
+  "constraints": [
+    "Video uploads must be restricted to the authenticated owner only",
+    "All users can view videos without authentication",
+    "Use Internet Identity for owner authentication"
+  ],
+  "nonGoals": [
+    "Multi-user upload functionality",
+    "Video comments or social interactions",
+    "Video editing capabilities",
+    "Live streaming features",
+    "Direct messaging between users"
+  ],
+  "imageRequirements": {
+    "required": [
+      "Creator profile picture placeholder with modern gradient design (profile-avatar.dim_200x200.png)",
+      "App logo with bold, energetic styling suitable for video platform branding (app-logo.dim_300x100.png)",
+      "Video thumbnail placeholder for empty states (video-placeholder.dim_400x600.png)"
+    ],
+    "edits": []
+  }
+}
