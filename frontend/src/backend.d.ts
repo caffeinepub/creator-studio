@@ -18,9 +18,11 @@ export interface Video {
     id: string;
     title: string;
     duration: bigint;
+    thumbnail?: ExternalBlob;
     file: ExternalBlob;
     description: string;
     uploadTimestamp: Time;
+    viewCount: bigint;
 }
 export type Time = bigint;
 export interface UserProfile {
@@ -51,5 +53,6 @@ export interface backendInterface {
     listVideos(): Promise<Array<Video>>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     unfollowUser(target: Principal): Promise<boolean>;
+    uploadThumbnail(videoId: string, thumbnail: ExternalBlob): Promise<void>;
     uploadVideo(id: string, title: string, description: string, duration: bigint, file: ExternalBlob): Promise<UploadResult>;
 }

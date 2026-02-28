@@ -31,9 +31,11 @@ export const Video = IDL.Record({
   'id' : IDL.Text,
   'title' : IDL.Text,
   'duration' : IDL.Nat,
+  'thumbnail' : IDL.Opt(ExternalBlob),
   'file' : ExternalBlob,
   'description' : IDL.Text,
   'uploadTimestamp' : Time,
+  'viewCount' : IDL.Nat,
 });
 export const UploadResult = IDL.Variant({
   'ok' : IDL.Text,
@@ -78,12 +80,13 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
-  'getVideo' : IDL.Func([IDL.Text], [IDL.Opt(Video)], ['query']),
+  'getVideo' : IDL.Func([IDL.Text], [IDL.Opt(Video)], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isFollowing' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
   'listVideos' : IDL.Func([], [IDL.Vec(Video)], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'unfollowUser' : IDL.Func([IDL.Principal], [IDL.Bool], []),
+  'uploadThumbnail' : IDL.Func([IDL.Text, ExternalBlob], [], []),
   'uploadVideo' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Nat, ExternalBlob],
       [UploadResult],
@@ -117,9 +120,11 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'title' : IDL.Text,
     'duration' : IDL.Nat,
+    'thumbnail' : IDL.Opt(ExternalBlob),
     'file' : ExternalBlob,
     'description' : IDL.Text,
     'uploadTimestamp' : Time,
+    'viewCount' : IDL.Nat,
   });
   const UploadResult = IDL.Variant({ 'ok' : IDL.Text, 'error' : IDL.Text });
   
@@ -161,12 +166,13 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
-    'getVideo' : IDL.Func([IDL.Text], [IDL.Opt(Video)], ['query']),
+    'getVideo' : IDL.Func([IDL.Text], [IDL.Opt(Video)], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isFollowing' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
     'listVideos' : IDL.Func([], [IDL.Vec(Video)], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'unfollowUser' : IDL.Func([IDL.Principal], [IDL.Bool], []),
+    'uploadThumbnail' : IDL.Func([IDL.Text, ExternalBlob], [], []),
     'uploadVideo' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Nat, ExternalBlob],
         [UploadResult],

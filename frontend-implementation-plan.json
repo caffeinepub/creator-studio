@@ -1,40 +1,54 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add fan follow/subscribe functionality",
+  "title": "Add thumbnail support for videos",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Add Follow button on creator's profile page that toggles between Follow/Following states and displays real-time follower count",
+      "id": "REQ-2",
+      "summary": "Add optional thumbnail image upload input to the Upload Video page with preview functionality",
       "acceptanceCriteria": [
-        "An authenticated user who has not yet followed sees a 'Follow' button on the profile page",
-        "Clicking 'Follow' persists the follow relationship and the button changes to 'Following'",
-        "Clicking 'Following' (unfollow) removes the follow relationship and reverts the button to 'Follow'",
-        "The follower count is displayed on the profile page and updates in real time after follow/unfollow actions",
-        "Unauthenticated visitors see a prompt to log in when they attempt to follow"
+        "An image file picker labeled 'Thumbnail (optional)' appears on the upload form.",
+        "Only image file types (JPEG, PNG, WebP) are accepted.",
+        "A preview of the selected thumbnail is displayed before submission.",
+        "The thumbnail is included in the upload submission when provided.",
+        "Submitting without a thumbnail still works."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/ProfilePage.tsx",
+          "path": "frontend/src/pages/UploadVideoPage.tsx",
           "operation": "modify",
-          "description": "Add Follow/Following button to the profile page that uses the useFollowCreator and useUnfollowCreator mutation hooks. Display the follower count using useFollowerCount hook. Check the current follow state with useIsFollowing hook. Show loading state on the button while mutations are in flight. For unauthenticated users, disable the button and show a tooltip or prompt to log in. Update the profile header layout to accommodate the new follow button and follower count display."
+          "description": "Add an optional image file input with accept attribute for JPEG, PNG, and WebP formats. Add state management for the selected thumbnail file and preview URL using useState. Display a thumbnail preview section when an image is selected. When submitting the form, convert the selected image file to ExternalBlob using ExternalBlob.fromBytes() and pass it to the uploadVideo mutation. Ensure the form still submits successfully when no thumbnail is selected."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add React Query hooks for follow/unfollow actions and follower count with automatic cache invalidation",
+      "summary": "Display video thumbnail in VideoCard component with fallback placeholder",
       "acceptanceCriteria": [
-        "useFollowCreator and useUnfollowCreator mutation hooks are available",
-        "useFollowerCount and useIsFollowing query hooks are available",
-        "Follow/unfollow mutations invalidate the relevant queries so counts update immediately",
-        "Loading state is shown on the Follow button while the mutation is in flight"
+        "VideoCard displays the video's thumbnail image when one exists.",
+        "A styled placeholder is shown when no thumbnail is available.",
+        "Thumbnail image renders at a consistent aspect ratio across all cards."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/VideoCard.tsx",
           "operation": "modify",
-          "description": "Add useFollowCreator mutation hook that calls actor.followUser(target) and invalidates both the followerCount and isFollowing queries for the target user upon success. Add useUnfollowCreator mutation hook that calls actor.unfollowUser(target) and invalidates the same queries. Add useFollowerCount query hook that accepts a Principal parameter and calls actor.getFollowerCount(user) to fetch the follower count for a given user. Add useIsFollowing query hook that accepts a Principal parameter and calls actor.isFollowing(target) to check if the current user is following the target. Ensure all queries are enabled only when the actor is available. Use appropriate query keys like ['followerCount', principal] and ['isFollowing', principal] for proper cache management."
+          "description": "Modify the VideoCard component to display the video's thumbnail if available using thumbnail.getDirectURL(). When no thumbnail exists, display the generated placeholder image from frontend/public/assets/generated/video-placeholder.dim_400x600.png. Ensure the image renders with consistent aspect ratio using Tailwind's aspect-ratio utilities and object-cover for proper scaling."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Display thumbnail as video poster image on the Video Player page",
+      "acceptanceCriteria": [
+        "The video element uses the video's thumbnail as its poster attribute when available.",
+        "If no thumbnail exists, no poster is set (default browser behavior)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/VideoPlayerPage.tsx",
+          "operation": "modify",
+          "description": "Update the video element to include a poster attribute set to video.thumbnail.getDirectURL() when video.thumbnail exists. When no thumbnail is available, omit the poster attribute to use default browser behavior. Ensure the poster displays correctly before playback begins."
         }
       ]
     }

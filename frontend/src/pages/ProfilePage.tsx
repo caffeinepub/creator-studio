@@ -4,7 +4,7 @@ import { Principal } from '@dfinity/principal';
 import {
   useGetCallerUserProfile,
   useListVideos,
-  useIsCallerAdmin,
+  useIsAdmin,
   useFollowerCount,
   useIsFollowing,
   useFollowCreator,
@@ -21,7 +21,7 @@ export default function ProfilePage() {
   const { identity } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
   const { data: videos, isLoading: videosLoading } = useListVideos();
-  const { data: isAdmin } = useIsCallerAdmin();
+  const { data: isAdmin } = useIsAdmin();
 
   const isAuthenticated = !!identity;
   const callerPrincipal = identity?.getPrincipal();
@@ -253,7 +253,7 @@ export default function ProfilePage() {
                   className="aspect-[9/16] rounded-xl overflow-hidden bg-muted relative group cursor-pointer"
                 >
                   <img
-                    src="/assets/generated/video-placeholder.dim_400x600.png"
+                    src={video.thumbnail ? video.thumbnail.getDirectURL() : '/assets/generated/video-placeholder.dim_400x600.png'}
                     alt={video.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

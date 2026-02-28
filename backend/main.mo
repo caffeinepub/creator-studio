@@ -3,12 +3,15 @@ import Text "mo:core/Text";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
+import Array "mo:core/Array";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
-import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Array "mo:core/Array";
+import MixinAuthorization "authorization/MixinAuthorization";
+import Migration "migration";
 
+// Apply migration on upgrade
+(with migration = Migration.run)
 actor {
   include MixinStorage();
 
@@ -22,6 +25,8 @@ actor {
     duration : Nat;
     uploadTimestamp : Time.Time;
     file : Storage.ExternalBlob;
+    viewCount : Nat;
+    thumbnail : ?Storage.ExternalBlob; // New thumbnail field
   };
 
   public type UserProfile = {
@@ -58,10 +63,43 @@ actor {
       duration;
       uploadTimestamp = Time.now();
       file;
+      viewCount = 0;
+      thumbnail = null;
     };
 
     videos.add(id, video);
     #ok("Video uploaded successfully. Duration: " # duration.toText() # " seconds");
+  };
+
+  public shared ({ caller }) func uploadThumbnail(videoId : Text, thumbnail : Storage.ExternalBlob) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can upload thumbnails");
+    };
+
+    switch (videos.get(videoId)) {
+      case (?video) {
+        let updatedVideo = { video with thumbnail = ?thumbnail };
+        videos.add(videoId, updatedVideo);
+      };
+      case (null) {
+        Runtime.trap("Video not found");
+      };
+    };
+  };
+
+  public shared ({ caller }) func getVideo(id : Text) : async ?Video {
+    switch (videos.get(id)) {
+      case (?video) {
+        let updatedVideo = { video with viewCount = video.viewCount + 1 };
+        videos.add(id, updatedVideo);
+        ?updatedVideo;
+      };
+      case (null) { null };
+    };
+  };
+
+  public query func listVideos() : async [Video] {
+    videos.values().toArray();
   };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -85,23 +123,9 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  public query func getVideo(id : Text) : async ?Video {
-    videos.get(id);
-  };
-
-  public query func listVideos() : async [Video] {
-    videos.values().toArray();
-  };
-
   // New Follower Functionality
-  public type Follower = {
-    follower : Principal;
-    following : Principal;
-  };
-
   let followers = Map.empty<Principal, [Principal]>();
 
-  // Follow a user (add follower relationship)
   public shared ({ caller }) func followUser(target : Principal) : async Bool {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can follow others");
@@ -129,7 +153,6 @@ actor {
     true;
   };
 
-  // Unfollow a user (remove follower relationship)
   public shared ({ caller }) func unfollowUser(target : Principal) : async Bool {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can unfollow others");
@@ -149,7 +172,6 @@ actor {
     };
   };
 
-  // Get follower count for a user
   public query func getFollowerCount(user : Principal) : async Nat {
     switch (followers.get(user)) {
       case (?userFollowers) { userFollowers.size() };
@@ -157,7 +179,6 @@ actor {
     };
   };
 
-  // Check if the caller is following a specific user
   public query ({ caller }) func isFollowing(target : Principal) : async Bool {
     switch (followers.get(target)) {
       case (?userFollowers) {

@@ -1,8 +1,16 @@
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useGetVideo } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { ArrowLeft, Calendar, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+
+function formatViewCount(count: bigint): string {
+  return new Intl.NumberFormat('en-US').format(count);
+}
+
+function viewLabel(count: bigint): string {
+  return count === 1n ? '1 view' : `${formatViewCount(count)} views`;
+}
 
 export default function VideoPlayerPage() {
   const { id } = useParams({ from: '/video/$id' });
@@ -45,6 +53,7 @@ export default function VideoPlayerPage() {
   }
 
   const videoUrl = video.file.getDirectURL();
+  const posterUrl = video.thumbnail ? video.thumbnail.getDirectURL() : undefined;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -64,6 +73,7 @@ export default function VideoPlayerPage() {
             controls
             className="w-full h-full"
             autoPlay
+            {...(posterUrl ? { poster: posterUrl } : {})}
           >
             Your browser does not support the video tag.
           </video>
@@ -72,9 +82,15 @@ export default function VideoPlayerPage() {
         <div className="p-6">
           <h1 className="text-3xl font-bold mb-4">{video.title}</h1>
           
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDate(video.uploadTimestamp)}</span>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>{formatDate(video.uploadTimestamp)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              <span>{viewLabel(video.viewCount)}</span>
+            </div>
           </div>
 
           <div className="prose prose-sm max-w-none">

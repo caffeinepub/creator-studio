@@ -95,11 +95,32 @@ export function useUploadVideo() {
   });
 }
 
-export function useIsCallerAdmin() {
+export function useUploadThumbnail() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      videoId,
+      thumbnail,
+    }: {
+      videoId: string;
+      thumbnail: ExternalBlob;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.uploadThumbnail(videoId, thumbnail);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['videos'] });
+    },
+  });
+}
+
+export function useIsAdmin() {
   const { actor, isFetching } = useActor();
 
   return useQuery<boolean>({
-    queryKey: ['isCallerAdmin'],
+    queryKey: ['isAdmin'],
     queryFn: async () => {
       if (!actor) return false;
       return actor.isCallerAdmin();
@@ -108,31 +129,29 @@ export function useIsCallerAdmin() {
   });
 }
 
-// ── Follow / Unfollow hooks ──────────────────────────────────────────────────
-
-export function useFollowerCount(userPrincipal: Principal | null) {
+export function useFollowerCount(user: Principal | null) {
   const { actor, isFetching } = useActor();
 
   return useQuery<bigint>({
-    queryKey: ['followerCount', userPrincipal?.toString()],
+    queryKey: ['followerCount', user?.toString()],
     queryFn: async () => {
-      if (!actor || !userPrincipal) return BigInt(0);
-      return actor.getFollowerCount(userPrincipal);
+      if (!actor || !user) return 0n;
+      return actor.getFollowerCount(user);
     },
-    enabled: !!actor && !isFetching && !!userPrincipal,
+    enabled: !!actor && !isFetching && !!user,
   });
 }
 
-export function useIsFollowing(targetPrincipal: Principal | null) {
+export function useIsFollowing(target: Principal | null) {
   const { actor, isFetching } = useActor();
 
   return useQuery<boolean>({
-    queryKey: ['isFollowing', targetPrincipal?.toString()],
+    queryKey: ['isFollowing', target?.toString()],
     queryFn: async () => {
-      if (!actor || !targetPrincipal) return false;
-      return actor.isFollowing(targetPrincipal);
+      if (!actor || !target) return false;
+      return actor.isFollowing(target);
     },
-    enabled: !!actor && !isFetching && !!targetPrincipal,
+    enabled: !!actor && !isFetching && !!target,
   });
 }
 

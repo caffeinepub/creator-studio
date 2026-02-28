@@ -1,78 +1,92 @@
 {
   "kind": "build_request",
-  "title": "Add fan follow/subscribe functionality",
-  "projectName": "FloridaDave Creator Studio",
+  "title": "Add thumbnail support for videos",
+  "projectName": "Creator Studio",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a 'Follow' button on the creator's profile page that allows any authenticated fan to follow FloridaDave. The button should toggle between 'Follow' and 'Following' states based on whether the current user already follows the creator.",
-      "target": "both",
+      "text": "Extend the backend video record to include an optional thumbnail blob field, and add an endpoint to upload/update a video's thumbnail (accepting image blob data) and retrieve it.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-5"
         ],
         "quotes": [
-          "can you make sure my fans can follow me with no problems?"
+          "can I do thumbnails?"
         ]
       },
       "acceptanceCriteria": [
-        "An authenticated user who has not yet followed sees a 'Follow' button on the profile page",
-        "Clicking 'Follow' persists the follow relationship and the button changes to 'Following'",
-        "Clicking 'Following' (unfollow) removes the follow relationship and reverts the button to 'Follow'",
-        "The follower count is displayed on the profile page and updates in real time after follow/unfollow actions",
-        "Unauthenticated visitors see a prompt to log in when they attempt to follow"
+        "The video record type includes an optional thumbnail field (blob or null).",
+        "An authenticated video owner can upload or replace a thumbnail for their video.",
+        "The thumbnail blob is retrievable by video ID.",
+        "Non-owners cannot update another user's thumbnail."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement backend storage for follower relationships. Store follower/following associations per user principal, and expose query functions to get follower count for a profile and to check whether the calling user follows a given profile, plus update functions to follow/unfollow.",
-      "target": "backend",
+      "text": "On the Upload Video page, add an optional thumbnail image upload input that accepts common image formats (JPEG, PNG, WebP). The selected image should be previewed before submission and uploaded alongside the video.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-5"
         ],
         "quotes": [
-          "can you make sure my fans can follow me with no problems?"
+          "can I do thumbnails?"
         ]
       },
       "acceptanceCriteria": [
-        "Backend stores follower relationships keyed by followed user principal",
-        "A query returns the total follower count for a given principal",
-        "A query returns whether the calling principal is following a given principal",
-        "Update functions allow authenticated callers to follow or unfollow a principal",
-        "A caller cannot follow themselves"
+        "An image file picker labeled 'Thumbnail (optional)' appears on the upload form.",
+        "Only image file types (JPEG, PNG, WebP) are accepted.",
+        "A preview of the selected thumbnail is displayed before submission.",
+        "The thumbnail is included in the upload submission when provided.",
+        "Submitting without a thumbnail still works."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add React Query hooks in useQueries.ts for the follow/unfollow actions and follower count, and wire them up to the profile page UI so state is kept consistent without full page reloads.",
+      "text": "Display the video thumbnail image in the VideoCard component. If no thumbnail has been set, show a neutral placeholder graphic instead.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-5"
         ],
         "quotes": [
-          "can you make sure my fans can follow me with no problems?"
+          "can I do thumbnails?"
         ]
       },
       "acceptanceCriteria": [
-        "useFollowCreator and useUnfollowCreator mutation hooks are available",
-        "useFollowerCount and useIsFollowing query hooks are available",
-        "Follow/unfollow mutations invalidate the relevant queries so counts update immediately",
-        "Loading state is shown on the Follow button while the mutation is in flight"
+        "VideoCard displays the video's thumbnail image when one exists.",
+        "A styled placeholder is shown when no thumbnail is available.",
+        "Thumbnail image renders at a consistent aspect ratio across all cards."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "On the Video Player page, display the thumbnail as the poster/preview image shown before the video begins playing.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "can I do thumbnails?"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The video element uses the video's thumbnail as its poster attribute when available.",
+        "If no thumbnail exists, no poster is set (default browser behavior)."
       ]
     }
   ],
   "constraints": [
-    "All Motoko logic must remain in the single backend/main.mo actor",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
+    "Thumbnail data must be stored in the backend canister blob storage, not as external URLs.",
+    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Email or push notifications for new followers",
-    "A follower feed or activity timeline",
-    "Custom domain DNS configuration (user has already set that up)",
-    "Paid subscriptions or fan tiers"
+    "Auto-generating thumbnails from video frames.",
+    "Thumbnail cropping or editing tools.",
+    "Thumbnail management as a separate dedicated page."
   ],
   "imageRequirements": {
     "required": [],

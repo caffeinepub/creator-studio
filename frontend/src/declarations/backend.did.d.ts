@@ -22,9 +22,11 @@ export interface Video {
   'id' : string,
   'title' : string,
   'duration' : bigint,
+  'thumbnail' : [] | [ExternalBlob],
   'file' : ExternalBlob,
   'description' : string,
   'uploadTimestamp' : Time,
+  'viewCount' : bigint,
 }
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
@@ -66,6 +68,7 @@ export interface _SERVICE {
   'listVideos' : ActorMethod<[], Array<Video>>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'unfollowUser' : ActorMethod<[Principal], boolean>,
+  'uploadThumbnail' : ActorMethod<[string, ExternalBlob], undefined>,
   'uploadVideo' : ActorMethod<
     [string, string, string, bigint, ExternalBlob],
     UploadResult

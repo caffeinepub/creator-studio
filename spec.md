@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Allow authenticated fans to follow/unfollow FloridaDave on the creator's profile page, with real-time follower count updates.
+**Goal:** Add thumbnail support to videos in Creator Studio, allowing creators to upload, store, and display custom thumbnail images for their videos.
 
 **Planned changes:**
-- Add backend Motoko storage for follower relationships, with query functions for follower count and follow-status checks, and update functions to follow/unfollow (preventing self-follows)
-- Add a Follow/Following toggle button on the profile page that shows a login prompt to unauthenticated visitors
-- Display and update the follower count in real time after follow/unfollow actions
-- Add `useFollowCreator`, `useUnfollowCreator`, `useFollowerCount`, and `useIsFollowing` hooks in `useQueries.ts`, with mutations that invalidate relevant queries and show a loading state on the button
+- Extend the backend video record with an optional thumbnail blob field
+- Add backend endpoints to upload/update and retrieve a video thumbnail, restricted to the video owner
+- Add an optional "Thumbnail (optional)" image file picker (JPEG, PNG, WebP) to the Upload Video page with a preview before submission
+- Display the thumbnail in the VideoCard component, falling back to a placeholder when none is set
+- Use the thumbnail as the poster image on the Video Player page before playback begins
 
-**User-visible outcome:** Fans can follow or unfollow FloridaDave from the profile page; the follower count updates immediately, and unauthenticated visitors are prompted to log in before following.
+**User-visible outcome:** Creators can optionally upload a thumbnail when uploading a video. Thumbnails appear on video cards in the browse view and as the poster image on the video player page. Cards without a thumbnail show a neutral placeholder.

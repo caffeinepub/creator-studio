@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useUploadVideo } from '../hooks/useQueries';
+import { useUploadVideo, useUploadThumbnail } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, Video, AlertCircle, Clock } from 'lucide-react';
+import { Upload, Video, AlertCircle, Clock, ImagePlus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { ExternalBlob } from '../backend';
 import UploadSuccessModal from '../components/UploadSuccessModal';
@@ -17,7 +17,8 @@ import { useNavigate } from '@tanstack/react-router';
 export default function UploadVideoPage() {
   const navigate = useNavigate();
   const { identity } = useInternetIdentity();
-  const { mutate: uploadVideo, isPending } = useUploadVideo();
+  const { mutate: uploadVideo, isPending: isVideoUploading } = useUploadVideo();
+  const { mutateAsync: uploadThumbnail, isPending: isThumbnailUploading } = useUploadThumbnail();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -26,8 +27,15 @@ export default function UploadVideoPage() {
   const [durationError, setDurationError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Thumbnail state
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
+  const isPending = isVideoUploading || isThumbnailUploading;
   const isAuthenticated = !!identity;
 
   if (!isAuthenticated) {
@@ -56,13 +64,11 @@ export default function UploadVideoPage() {
       return;
     }
 
-    // Reset previous state
     setDurationError(null);
     setVideoDuration(null);
     setVideoFile(null);
     setUploadProgress(0);
 
-    // Read duration via a temporary video element
     const url = URL.createObjectURL(file);
     const tempVideo = document.createElement('video');
     tempVideo.preload = 'metadata';
@@ -94,6 +100,35 @@ export default function UploadVideoPage() {
     };
 
     tempVideo.src = url;
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('Please select a JPEG, PNG, or WebP image');
+      if (thumbnailInputRef.current) thumbnailInputRef.current.value = '';
+      return;
+    }
+
+    // Revoke previous preview URL
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setThumbnailFile(file);
+    setThumbnailPreview(previewUrl);
+  };
+
+  const handleRemoveThumbnail = () => {
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+    setThumbnailFile(null);
+    setThumbnailPreview(null);
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -134,7 +169,19 @@ export default function UploadVideoPage() {
           file: blob,
         },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            // Upload thumbnail if one was selected
+            if (thumbnailFile) {
+              try {
+                const thumbBuffer = await thumbnailFile.arrayBuffer();
+                const thumbUint8 = new Uint8Array(thumbBuffer);
+                const thumbBlob = ExternalBlob.fromBytes(thumbUint8);
+                await uploadThumbnail({ videoId, thumbnail: thumbBlob });
+              } catch {
+                toast.error('Video uploaded but thumbnail upload failed');
+              }
+            }
+
             setShowSuccessModal(true);
             setTitle('');
             setDescription('');
@@ -142,6 +189,7 @@ export default function UploadVideoPage() {
             setVideoDuration(null);
             setDurationError(null);
             setUploadProgress(0);
+            handleRemoveThumbnail();
             if (fileInputRef.current) {
               fileInputRef.current.value = '';
             }
@@ -197,6 +245,60 @@ export default function UploadVideoPage() {
                 disabled={isPending}
                 maxLength={500}
               />
+            </div>
+
+            {/* Thumbnail upload */}
+            <div className="space-y-2">
+              <Label htmlFor="thumbnail">Thumbnail (optional)</Label>
+              <input
+                ref={thumbnailInputRef}
+                id="thumbnail"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleThumbnailChange}
+                disabled={isPending}
+                className="hidden"
+              />
+              {thumbnailPreview ? (
+                <div className="relative w-full rounded-lg overflow-hidden border-2 border-border">
+                  <div className="aspect-[9/16] max-h-48 w-full relative">
+                    <img
+                      src={thumbnailPreview}
+                      alt="Thumbnail preview"
+                      className="w-full h-full object-cover"
+                    />
+                    {!isPending && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveThumbnail}
+                        className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors"
+                        aria-label="Remove thumbnail"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="px-3 py-2 bg-muted/50 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground truncate">{thumbnailFile?.name}</span>
+                    {!isPending && (
+                      <label htmlFor="thumbnail" className="cursor-pointer text-sm text-primary hover:underline ml-2 shrink-0">
+                        Change
+                      </label>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <label
+                  htmlFor="thumbnail"
+                  className={`flex flex-col items-center gap-3 border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isPending ? 'opacity-50 cursor-not-allowed' : 'border-border hover:border-primary'}`}
+                >
+                  <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">Click to upload thumbnail</p>
+                    <p className="text-xs text-muted-foreground">JPEG, PNG, or WebP</p>
+                  </div>
+                </label>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -263,7 +365,7 @@ export default function UploadVideoPage() {
             {isPending && uploadProgress > 0 && (
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Uploading...</span>
+                  <span>{isThumbnailUploading ? 'Uploading thumbnail...' : 'Uploading video...'}</span>
                   <span>{uploadProgress}%</span>
                 </div>
                 <Progress value={uploadProgress} />
