@@ -1,0 +1,16 @@
+{
+  "frontend/src/App.tsx": "Main application component with TanStack Router setup, routes for video feed, player, profile, and upload pages, plus profile setup modal integration.",
+  "frontend/src/components/Layout.tsx": "Layout wrapper component providing consistent structure with navigation bar, main content area, and footer with attribution.",
+  "frontend/src/components/NavigationBar.tsx": "Sticky navigation header with app logo, navigation links (Videos, Profile), and a prominent \"Upload Video\" button visible to all authenticated users (not just admins), plus the login button.",
+  "frontend/src/components/LoginButton.tsx": "Authentication button component handling Internet Identity login/logout with visual state indicators.",
+  "frontend/src/components/ProfileSetupModal.tsx": "Modal dialog for first-time user profile creation, prompting for name input with form validation.",
+  "frontend/src/components/VideoCard.tsx": "Reusable video card component displaying thumbnail, title, description, and upload date with hover effects and navigation.",
+  "frontend/src/components/UploadSuccessModal.tsx": "Success confirmation modal shown after video upload completion with navigation to video feed.",
+  "frontend/src/pages/VideoFeedPage.tsx": "Main video feed page displaying grid of video cards with loading states and empty state messaging.",
+  "frontend/src/pages/VideoPlayerPage.tsx": "Video player page with full video controls, metadata display, and back navigation.",
+  "frontend/src/pages/ProfilePage.tsx": "TikTok-style creator profile page showing avatar, name, bio, video/follower/likes stats, and a Follow/Following toggle button for authenticated non-creator fans; stores the creator's principal in localStorage so fans can follow even when the creator is offline.",
+  "frontend/src/pages/UploadVideoPage.tsx": "Video upload page accessible to all authenticated users (not just admins), with client-side duration validation (10–20 seconds), file selection, progress tracking, and success modal on completion.",
+  "frontend/src/hooks/useQueries.ts": "Custom React Query hooks for all backend operations including video listing, profile management, video upload, admin check, and new follow/unfollow hooks (useFollowerCount, useIsFollowing, useFollowCreator, useUnfollowCreator) with proper cache invalidation.",
+  "frontend/src/index.css": "Global styles with OKLCH color system using warm orange/red tones for primary colors, avoiding blue and purple as specified.",
+  "frontend/tailwind.config.js": "Tailwind configuration with custom font families, extended color palette, border radius, shadows, and animations for modern social media aesthetic."
+}

@@ -1,0 +1,81 @@
+{
+  "kind": "build_request",
+  "title": "Add fan follow/subscribe functionality",
+  "projectName": "FloridaDave Creator Studio",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Add a 'Follow' button on the creator's profile page that allows any authenticated fan to follow FloridaDave. The button should toggle between 'Follow' and 'Following' states based on whether the current user already follows the creator.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "can you make sure my fans can follow me with no problems?"
+        ]
+      },
+      "acceptanceCriteria": [
+        "An authenticated user who has not yet followed sees a 'Follow' button on the profile page",
+        "Clicking 'Follow' persists the follow relationship and the button changes to 'Following'",
+        "Clicking 'Following' (unfollow) removes the follow relationship and reverts the button to 'Follow'",
+        "The follower count is displayed on the profile page and updates in real time after follow/unfollow actions",
+        "Unauthenticated visitors see a prompt to log in when they attempt to follow"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement backend storage for follower relationships. Store follower/following associations per user principal, and expose query functions to get follower count for a profile and to check whether the calling user follows a given profile, plus update functions to follow/unfollow.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "can you make sure my fans can follow me with no problems?"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend stores follower relationships keyed by followed user principal",
+        "A query returns the total follower count for a given principal",
+        "A query returns whether the calling principal is following a given principal",
+        "Update functions allow authenticated callers to follow or unfollow a principal",
+        "A caller cannot follow themselves"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add React Query hooks in useQueries.ts for the follow/unfollow actions and follower count, and wire them up to the profile page UI so state is kept consistent without full page reloads.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "can you make sure my fans can follow me with no problems?"
+        ]
+      },
+      "acceptanceCriteria": [
+        "useFollowCreator and useUnfollowCreator mutation hooks are available",
+        "useFollowerCount and useIsFollowing query hooks are available",
+        "Follow/unfollow mutations invalidate the relevant queries so counts update immediately",
+        "Loading state is shown on the Follow button while the mutation is in flight"
+      ]
+    }
+  ],
+  "constraints": [
+    "All Motoko logic must remain in the single backend/main.mo actor",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
+  ],
+  "nonGoals": [
+    "Email or push notifications for new followers",
+    "A follower feed or activity timeline",
+    "Custom domain DNS configuration (user has already set that up)",
+    "Paid subscriptions or fan tiers"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

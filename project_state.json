@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "A fan-focused app for FloridaDave with upload functionality. User has set up a custom domain (FloridaDave.com). Now focusing on ensuring fans can follow the creator smoothly.",
+  "architectural_notes": [
+    "App is hosted on Internet Computer (ICP); user has configured a custom domain (FloridaDave.com) pointing to the canister."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-add-a-follow-button-on-the-creator-s-profile-page-that-allows-any-authenticated-fan-to-follow-floridadave-the-button-should-toggle-between-follow-and-following-states-based-on-whether-the-current-user-already-follows-the-creator",
+      "title": "Add a 'Follow' button on the creator's profile page that allows any authenticated fan to follow FloridaDave. The button should toggle between 'Follow' and 'Following' states based on whether the current user already follows the creator.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-react-query-hooks-in-usequeries-ts-for-the-follow-unfollow-actions-and-follower-count-and-wire-them-up-to-the-profile-page-ui-so-state-is-kept-consistent-without-full-page-reloads",
+      "title": "Add React Query hooks in useQueries.ts for the follow/unfollow actions and follower count, and wire them up to the profile page UI so state is kept consistent without full page reloads.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Ensure fans can follow the creator with no problems (smooth follow/subscribe flow)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Implement backend storage for follower relationships. Store follower/following associations per user principal, and expose query functions to get follower count for a profile and to check whether the calling user follows a given profile, plus update functions to follow/unfollow.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "FloridaDave",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

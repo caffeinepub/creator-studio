@@ -1,0 +1,42 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Add fan follow/subscribe functionality",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Add Follow button on creator's profile page that toggles between Follow/Following states and displays real-time follower count",
+      "acceptanceCriteria": [
+        "An authenticated user who has not yet followed sees a 'Follow' button on the profile page",
+        "Clicking 'Follow' persists the follow relationship and the button changes to 'Following'",
+        "Clicking 'Following' (unfollow) removes the follow relationship and reverts the button to 'Follow'",
+        "The follower count is displayed on the profile page and updates in real time after follow/unfollow actions",
+        "Unauthenticated visitors see a prompt to log in when they attempt to follow"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ProfilePage.tsx",
+          "operation": "modify",
+          "description": "Add Follow/Following button to the profile page that uses the useFollowCreator and useUnfollowCreator mutation hooks. Display the follower count using useFollowerCount hook. Check the current follow state with useIsFollowing hook. Show loading state on the button while mutations are in flight. For unauthenticated users, disable the button and show a tooltip or prompt to log in. Update the profile header layout to accommodate the new follow button and follower count display."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add React Query hooks for follow/unfollow actions and follower count with automatic cache invalidation",
+      "acceptanceCriteria": [
+        "useFollowCreator and useUnfollowCreator mutation hooks are available",
+        "useFollowerCount and useIsFollowing query hooks are available",
+        "Follow/unfollow mutations invalidate the relevant queries so counts update immediately",
+        "Loading state is shown on the Follow button while the mutation is in flight"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add useFollowCreator mutation hook that calls actor.followUser(target) and invalidates both the followerCount and isFollowing queries for the target user upon success. Add useUnfollowCreator mutation hook that calls actor.unfollowUser(target) and invalidates the same queries. Add useFollowerCount query hook that accepts a Principal parameter and calls actor.getFollowerCount(user) to fetch the follower count for a given user. Add useIsFollowing query hook that accepts a Principal parameter and calls actor.isFollowing(target) to check if the current user is following the target. Ensure all queries are enabled only when the actor is available. Use appropriate query keys like ['followerCount', principal] and ['isFollowing', principal] for proper cache management."
+        }
+      ]
+    }
+  ]
+}

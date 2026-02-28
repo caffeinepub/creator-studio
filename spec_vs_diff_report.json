@@ -1,0 +1,32 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-28T19:57:44.250Z",
+  "summary": "The diff implements the core follow/unfollow functionality across backend and frontend. Backend adds followUser, unfollowUser, getFollowerCount, and isFollowing functions with self-follow prevention. Frontend adds the four required React Query hooks and wires them into the ProfilePage with a Follow/Following toggle button, follower count display, loading states, and a localStorage-based creator principal persistence mechanism. Nearly all requirements are met, with one minor gap around the unauthenticated user login prompt.",
+  "missing_requirements": [
+    {
+      "requirement": "Unauthenticated visitors see a prompt to log in when they attempt to follow",
+      "reason": "The ProfilePage diff shows the Follow button logic, but the truncated portion makes it unclear whether unauthenticated visitors are shown a login prompt when attempting to follow. The handleFollowToggle function does not include an early-return or modal/prompt for unauthenticated users based on the visible code. The isAuthenticated check gates the isFollowing query but the button behavior for unauthenticated users clicking Follow is not confirmed in the diff.",
+      "evidence": [
+        "frontend/src/pages/ProfilePage.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "localStorage persistence of the creator's principal (CREATOR_PRINCIPAL_KEY) so fans can follow even when the creator is offline",
+      "reason": "The build request does not mention storing the creator principal in localStorage or any mechanism for offline principal discovery. This is an extra architectural decision not requested.",
+      "evidence": [
+        "frontend/src/pages/ProfilePage.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.78,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/ProfilePage.tsx",
+    "project_state.json"
+  ]
+}

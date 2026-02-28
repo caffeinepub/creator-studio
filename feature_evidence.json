@@ -1,0 +1,45 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-a-follow-button-on-the-creator-s-profile-page-that-allows-any-authenticated-fan-to-follow-floridadave-the-button-should-toggle-between-follow-and-following-states-based-on-whether-the-current-user-already-follows-the-creator",
+      "featureTitle": "Add a 'Follow' button on the creator's profile page that allows any authenticated fan to follow FloridaDave. The button should toggle between 'Follow' and 'Following' states based on whether the current user already follows the creator.",
+      "files": [
+        "frontend/src/pages/ProfilePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-react-query-hooks-in-usequeries-ts-for-the-follow-unfollow-actions-and-follower-count-and-wire-them-up-to-the-profile-page-ui-so-state-is-kept-consistent-without-full-page-reloads",
+      "featureTitle": "Add React Query hooks in useQueries.ts for the follow/unfollow actions and follower count, and wire them up to the profile page UI so state is kept consistent without full page reloads.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
