@@ -8,10 +8,9 @@ import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
 
 // Apply migration on upgrade
-(with migration = Migration.run)
+
 actor {
   include MixinStorage();
 
@@ -47,6 +46,7 @@ actor {
     description : Text,
     duration : Nat,
     file : Storage.ExternalBlob,
+    thumbnail : ?Storage.ExternalBlob, // Now accepts an optional thumbnail
   ) : async UploadResult {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       return #error("Unauthorized: Only users can upload videos");
@@ -64,7 +64,7 @@ actor {
       uploadTimestamp = Time.now();
       file;
       viewCount = 0;
-      thumbnail = null;
+      thumbnail; // Store thumbnail if provided
     };
 
     videos.add(id, video);
@@ -189,3 +189,4 @@ actor {
     };
   };
 };
+

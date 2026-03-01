@@ -70,7 +70,7 @@ export interface _SERVICE {
   'unfollowUser' : ActorMethod<[Principal], boolean>,
   'uploadThumbnail' : ActorMethod<[string, ExternalBlob], undefined>,
   'uploadVideo' : ActorMethod<
-    [string, string, string, bigint, ExternalBlob],
+    [string, string, string, bigint, ExternalBlob, [] | [ExternalBlob]],
     UploadResult
   >,
 }

@@ -1,92 +1,90 @@
 {
   "kind": "build_request",
-  "title": "Add thumbnail support for videos",
-  "projectName": "Creator Studio",
+  "title": "Enable video thumbnail uploads",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Extend the backend video record to include an optional thumbnail blob field, and add an endpoint to upload/update a video's thumbnail (accepting image blob data) and retrieve it.",
+      "text": "On the Upload Video page, provide a file input that allows authenticated users to select and upload an optional image file as a thumbnail for their video. The selected thumbnail should be sent to the backend alongside the video blob.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "can I upload video thumbnails?"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The upload form includes a clearly labelled optional thumbnail file input accepting common image formats (PNG, JPG, GIF, WebP).",
+        "A preview of the selected thumbnail image is shown before submission.",
+        "On form submission, the thumbnail blob is passed to the upload mutation alongside the video.",
+        "If no thumbnail is selected, the upload proceeds without one (thumbnail remains optional)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Persist an optional thumbnail blob field on Video records in the backend actor. Expose an endpoint (or extend the existing video upload endpoint) that accepts and stores the thumbnail blob. Return the thumbnail alongside video metadata when videos are retrieved.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-5"
         ],
         "quotes": [
-          "can I do thumbnails?"
+          "can I upload video thumbnails?"
         ]
       },
       "acceptanceCriteria": [
-        "The video record type includes an optional thumbnail field (blob or null).",
-        "An authenticated video owner can upload or replace a thumbnail for their video.",
-        "The thumbnail blob is retrievable by video ID.",
-        "Non-owners cannot update another user's thumbnail."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "On the Upload Video page, add an optional thumbnail image upload input that accepts common image formats (JPEG, PNG, WebP). The selected image should be previewed before submission and uploaded alongside the video.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-5"
-        ],
-        "quotes": [
-          "can I do thumbnails?"
-        ]
-      },
-      "acceptanceCriteria": [
-        "An image file picker labeled 'Thumbnail (optional)' appears on the upload form.",
-        "Only image file types (JPEG, PNG, WebP) are accepted.",
-        "A preview of the selected thumbnail is displayed before submission.",
-        "The thumbnail is included in the upload submission when provided.",
-        "Submitting without a thumbnail still works."
+        "Video records include a nullable/optional thumbnail field storing raw blob data.",
+        "The upload endpoint accepts an optional thumbnail argument and stores it on the video record.",
+        "Video retrieval endpoints return the thumbnail blob (or null) as part of the video data.",
+        "Existing videos without thumbnails are unaffected and return null for the thumbnail field."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Display the video thumbnail image in the VideoCard component. If no thumbnail has been set, show a neutral placeholder graphic instead.",
+      "text": "In the VideoCard component, display the uploaded thumbnail image when available. If no thumbnail exists, fall back to the current placeholder or default display.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-5"
         ],
         "quotes": [
-          "can I do thumbnails?"
+          "can I upload video thumbnails?"
         ]
       },
       "acceptanceCriteria": [
-        "VideoCard displays the video's thumbnail image when one exists.",
-        "A styled placeholder is shown when no thumbnail is available.",
-        "Thumbnail image renders at a consistent aspect ratio across all cards."
+        "VideoCard renders the thumbnail image when a thumbnail blob is present on the video record.",
+        "VideoCard renders a sensible fallback (placeholder or gradient) when no thumbnail is available.",
+        "Thumbnail images are displayed at consistent, appropriate dimensions within the card layout."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "On the Video Player page, display the thumbnail as the poster/preview image shown before the video begins playing.",
+      "text": "In the VideoPlayerPage, use the uploaded thumbnail as the video poster image when available so it displays before the video starts playing.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-5"
         ],
         "quotes": [
-          "can I do thumbnails?"
+          "can I upload video thumbnails?"
         ]
       },
       "acceptanceCriteria": [
-        "The video element uses the video's thumbnail as its poster attribute when available.",
-        "If no thumbnail exists, no poster is set (default browser behavior)."
+        "The video element's poster attribute is set to the thumbnail data URL when a thumbnail blob is present.",
+        "When no thumbnail is available, the video element has no poster or uses the existing fallback behaviour."
       ]
     }
   ],
   "constraints": [
-    "Thumbnail data must be stored in the backend canister blob storage, not as external URLs.",
-    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
+    "Thumbnail upload must remain optional — videos without thumbnails must continue to work.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Auto-generating thumbnails from video frames.",
-    "Thumbnail cropping or editing tools.",
-    "Thumbnail management as a separate dedicated page."
+    "Automatic thumbnail generation from video frames.",
+    "Thumbnail cropping or editing UI.",
+    "Changing the video upload size or duration validation logic."
   ],
   "imageRequirements": {
     "required": [],

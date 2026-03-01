@@ -10,7 +10,7 @@
   "frontend/src/pages/VideoPlayerPage.tsx": "Video player page with full controls, metadata display, and the video element's poster attribute set to the thumbnail URL when a thumbnail exists, omitting it otherwise for default browser behavior.",
   "frontend/src/pages/ProfilePage.tsx": "TikTok-style creator profile page showing avatar, name, bio, video/follower/likes stats, and a Follow/Following toggle button; fixes the import from `useIsCallerAdmin` to `useIsAdmin`, and displays video thumbnails when available with fallback to the placeholder image.",
   "frontend/src/pages/UploadVideoPage.tsx": "Video upload page with optional thumbnail image picker (JPEG/PNG/WebP) featuring preview and remove functionality, client-side duration validation, file selection, progress tracking, and sequential thumbnail upload after video upload success.",
-  "frontend/src/hooks/useQueries.ts": "Custom React Query hooks for all backend operations including video listing, profile management, video upload, thumbnail upload (useUploadThumbnail), admin check, and follow/unfollow hooks with proper cache invalidation.",
+  "frontend/src/hooks/useQueries.ts": "Custom React Query hooks for all backend operations including video listing, profile management, video upload (now passing the required `thumbnail` argument as `ExternalBlob | null`), thumbnail upload, admin check, and follow/unfollow hooks with proper cache invalidation.",
   "frontend/src/index.css": "Global styles with OKLCH color system using warm orange/red tones for primary colors, avoiding blue and purple as specified.",
   "frontend/tailwind.config.js": "Tailwind configuration with custom font families, extended color palette, border radius, shadows, and animations for modern social media aesthetic."
 }

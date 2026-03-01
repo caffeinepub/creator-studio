@@ -54,5 +54,5 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     unfollowUser(target: Principal): Promise<boolean>;
     uploadThumbnail(videoId: string, thumbnail: ExternalBlob): Promise<void>;
-    uploadVideo(id: string, title: string, description: string, duration: bigint, file: ExternalBlob): Promise<UploadResult>;
+    uploadVideo(id: string, title: string, description: string, duration: bigint, file: ExternalBlob, thumbnail: ExternalBlob | null): Promise<UploadResult>;
 }

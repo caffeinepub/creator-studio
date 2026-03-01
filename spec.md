@@ -1,13 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Add thumbnail support to videos in Creator Studio, allowing creators to upload, store, and display custom thumbnail images for their videos.
+**Goal:** Allow users to upload an optional thumbnail image alongside their video, display it in video cards and the video player.
 
 **Planned changes:**
-- Extend the backend video record with an optional thumbnail blob field
-- Add backend endpoints to upload/update and retrieve a video thumbnail, restricted to the video owner
-- Add an optional "Thumbnail (optional)" image file picker (JPEG, PNG, WebP) to the Upload Video page with a preview before submission
-- Display the thumbnail in the VideoCard component, falling back to a placeholder when none is set
-- Use the thumbnail as the poster image on the Video Player page before playback begins
+- Add an optional thumbnail file input (PNG, JPG, GIF, WebP) to the Upload Video form, with a preview before submission
+- Pass the thumbnail blob to the upload mutation alongside the video; proceed normally if no thumbnail is selected
+- Extend backend Video records with a nullable thumbnail blob field; update the upload endpoint to accept and store it; return it in video retrieval responses
+- Update VideoCard to render the thumbnail image when present, falling back to the existing placeholder/gradient when absent
+- Set the video element's `poster` attribute in VideoPlayerPage to the thumbnail data URL when available
 
-**User-visible outcome:** Creators can optionally upload a thumbnail when uploading a video. Thumbnails appear on video cards in the browse view and as the poster image on the video player page. Cards without a thumbnail show a neutral placeholder.
+**User-visible outcome:** Users can optionally attach a thumbnail image when uploading a video. The thumbnail appears on video cards and as the poster image in the video player before playback begins. Videos without thumbnails continue to work as before.

@@ -1,54 +1,53 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add thumbnail support for videos",
+  "title": "Enable video thumbnail uploads",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Add optional thumbnail image upload input to the Upload Video page with preview functionality",
+      "id": "REQ-1",
+      "summary": "Add optional thumbnail file input to the Upload Video page, with preview and submission alongside video blob",
       "acceptanceCriteria": [
-        "An image file picker labeled 'Thumbnail (optional)' appears on the upload form.",
-        "Only image file types (JPEG, PNG, WebP) are accepted.",
-        "A preview of the selected thumbnail is displayed before submission.",
-        "The thumbnail is included in the upload submission when provided.",
-        "Submitting without a thumbnail still works."
+        "The upload form includes a clearly labelled optional thumbnail file input accepting common image formats (PNG, JPG, GIF, WebP).",
+        "A preview of the selected thumbnail image is shown before submission.",
+        "On form submission, the thumbnail blob is passed to the upload mutation alongside the video.",
+        "If no thumbnail is selected, the upload proceeds without one (thumbnail remains optional)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/UploadVideoPage.tsx",
           "operation": "modify",
-          "description": "Add an optional image file input with accept attribute for JPEG, PNG, and WebP formats. Add state management for the selected thumbnail file and preview URL using useState. Display a thumbnail preview section when an image is selected. When submitting the form, convert the selected image file to ExternalBlob using ExternalBlob.fromBytes() and pass it to the uploadVideo mutation. Ensure the form still submits successfully when no thumbnail is selected."
+          "description": "Add a file input for optional thumbnail selection (accepting PNG, JPG, GIF, WebP). Add state to store the selected thumbnail file and display a preview image when a file is selected. Modify the form submission handler to convert the thumbnail file to ExternalBlob using ExternalBlob.fromBytes() and pass it as the thumbnail argument to the uploadVideo mutation. Ensure that if no thumbnail is selected, null is passed instead. Verify the blob-storage component's usage instructions before implementing the ExternalBlob conversion."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Display video thumbnail in VideoCard component with fallback placeholder",
+      "summary": "Display uploaded thumbnail in VideoCard component with fallback to placeholder when unavailable",
       "acceptanceCriteria": [
-        "VideoCard displays the video's thumbnail image when one exists.",
-        "A styled placeholder is shown when no thumbnail is available.",
-        "Thumbnail image renders at a consistent aspect ratio across all cards."
+        "VideoCard renders the thumbnail image when a thumbnail blob is present on the video record.",
+        "VideoCard renders a sensible fallback (placeholder or gradient) when no thumbnail is available.",
+        "Thumbnail images are displayed at consistent, appropriate dimensions within the card layout."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/VideoCard.tsx",
           "operation": "modify",
-          "description": "Modify the VideoCard component to display the video's thumbnail if available using thumbnail.getDirectURL(). When no thumbnail exists, display the generated placeholder image from frontend/public/assets/generated/video-placeholder.dim_400x600.png. Ensure the image renders with consistent aspect ratio using Tailwind's aspect-ratio utilities and object-cover for proper scaling."
+          "description": "Check if the video has a thumbnail field. If present, use thumbnail.getDirectURL() to obtain the thumbnail URL and display it as the card image. If no thumbnail exists, fall back to the existing placeholder image at frontend/public/assets/generated/video-placeholder.dim_400x600.png. Ensure consistent thumbnail dimensions within the card layout. Verify the blob-storage component's usage instructions before implementing the getDirectURL() call."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Display thumbnail as video poster image on the Video Player page",
+      "summary": "Use uploaded thumbnail as video poster image in VideoPlayerPage",
       "acceptanceCriteria": [
-        "The video element uses the video's thumbnail as its poster attribute when available.",
-        "If no thumbnail exists, no poster is set (default browser behavior)."
+        "The video element's poster attribute is set to the thumbnail data URL when a thumbnail blob is present.",
+        "When no thumbnail is available, the video element has no poster or uses the existing fallback behaviour."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/VideoPlayerPage.tsx",
           "operation": "modify",
-          "description": "Update the video element to include a poster attribute set to video.thumbnail.getDirectURL() when video.thumbnail exists. When no thumbnail is available, omit the poster attribute to use default browser behavior. Ensure the poster displays correctly before playback begins."
+          "description": "Check if the fetched video has a thumbnail field. If present, call thumbnail.getDirectURL() to obtain the thumbnail URL and set it as the poster attribute on the video element. If no thumbnail exists, omit the poster attribute or retain the current default behaviour. Verify the blob-storage component's usage instructions before implementing the getDirectURL() call."
         }
       ]
     }

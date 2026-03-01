@@ -88,7 +88,14 @@ export const idlService = IDL.Service({
   'unfollowUser' : IDL.Func([IDL.Principal], [IDL.Bool], []),
   'uploadThumbnail' : IDL.Func([IDL.Text, ExternalBlob], [], []),
   'uploadVideo' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Text, IDL.Nat, ExternalBlob],
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Nat,
+        ExternalBlob,
+        IDL.Opt(ExternalBlob),
+      ],
       [UploadResult],
       [],
     ),
@@ -174,7 +181,14 @@ export const idlFactory = ({ IDL }) => {
     'unfollowUser' : IDL.Func([IDL.Principal], [IDL.Bool], []),
     'uploadThumbnail' : IDL.Func([IDL.Text, ExternalBlob], [], []),
     'uploadVideo' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Text, IDL.Nat, ExternalBlob],
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Nat,
+          ExternalBlob,
+          IDL.Opt(ExternalBlob),
+        ],
         [UploadResult],
         [],
       ),

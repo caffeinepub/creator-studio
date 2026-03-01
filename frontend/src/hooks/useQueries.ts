@@ -75,15 +75,17 @@ export function useUploadVideo() {
       description,
       duration,
       file,
+      thumbnail = null,
     }: {
       id: string;
       title: string;
       description: string;
       duration: bigint;
       file: ExternalBlob;
+      thumbnail?: ExternalBlob | null;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      const result = await actor.uploadVideo(id, title, description, duration, file);
+      const result = await actor.uploadVideo(id, title, description, duration, file, thumbnail);
       if (result.__kind__ === 'error') {
         throw new Error(result.error);
       }

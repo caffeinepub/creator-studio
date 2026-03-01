@@ -1,53 +1,53 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project with video functionality; user wants to add thumbnail support for videos.",
+  "summary": "Video platform project with thumbnail upload support for videos.",
   "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
-  "existing_features": [
-    {
-      "id": "feature-on-the-upload-video-page-add-an-optional-thumbnail-image-upload-input-that-accepts-common-image-formats-jpeg-png-webp-the-selected-image-should-be-previewed-before-submission-and-uploaded-alongside-the-video",
-      "title": "On the Upload Video page, add an optional thumbnail image upload input that accepts common image formats (JPEG, PNG, WebP). The selected image should be previewed before submission and uploaded alongside the video.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-display-the-video-thumbnail-image-in-the-videocard-component-if-no-thumbnail-has-been-set-show-a-neutral-placeholder-graphic-instead",
-      "title": "Display the video thumbnail image in the VideoCard component. If no thumbnail has been set, show a neutral placeholder graphic instead.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-on-the-video-player-page-display-the-thumbnail-as-the-poster-preview-image-shown-before-the-video-begins-playing",
-      "title": "On the Video Player page, display the thumbnail as the poster/preview image shown before the video begins playing.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    }
-  ],
+  "existing_features": [],
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Allow users to add/manage thumbnails for videos",
+      "summary": "Allow users to upload video thumbnails",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Extend the backend video record to include an optional thumbnail blob field, and add an endpoint to upload/update a video's thumbnail (accepting image blob data) and retrieve it.",
+      "summary": "On the Upload Video page, provide a file input that allows authenticated users to select and upload an optional image file as a thumbnail for their video. The selected thumbnail should be sent to the backend alongside the video blob.",
       "reqIds": [
         "REQ-1"
       ],
       "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Persist an optional thumbnail blob field on Video records in the backend actor. Expose an endpoint (or extend the existing video upload endpoint) that accepts and stores the thumbnail blob. Return the thumbnail alongside video metadata when videos are retrieved.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "In the VideoCard component, display the uploaded thumbnail image when available. If no thumbnail exists, fall back to the current placeholder or default display.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "In the VideoPlayerPage, use the uploaded thumbnail as the video poster image when available so it displays before the video starts playing.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
     }
   ],
-  "projectName": "Creator Studio",
+  "gameProjectType": "none",
+  "projectName": "Enable video thumbnail uploads",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

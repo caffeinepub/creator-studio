@@ -1,73 +1,62 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T21:42:26.277Z",
+  "generatedAt": "2026-03-01T04:03:55.030Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 4,
-    "implemented": 3,
+    "implemented": 0,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Extend the backend video record to include an optional thumbnail blob field, and add an endpoint to upload/update a video's thumbnail (accepting image blob data) and retrieve it.",
+        "summary": "On the Upload Video page, provide a file input that allows authenticated users to select and upload an optional image file as a thumbnail for their video. The selected thumbnail should be sent to the backend alongside the video blob.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/pages/UploadVideoPage.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Persist an optional thumbnail blob field on Video records in the backend actor. Expose an endpoint (or extend the existing video upload endpoint) that accepts and stores the thumbnail blob. Return the thumbnail alongside video metadata when videos are retrieved.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-2",
-        "summary": "On the Upload Video page, add an optional thumbnail image upload input that accepts common image formats (JPEG, PNG, WebP). The selected image should be previewed before submission and uploaded alongside the video.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/UploadVideoPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/UploadVideoPage.tsx"
-        ]
-      },
-      {
         "id": "REQ-3",
-        "summary": "Display the video thumbnail image in the VideoCard component. If no thumbnail has been set, show a neutral placeholder graphic instead.",
-        "status": "implemented",
+        "summary": "In the VideoCard component, display the uploaded thumbnail image when available. If no thumbnail exists, fall back to the current placeholder or default display.",
+        "status": "missing",
         "plannedFiles": [
           "frontend/src/components/VideoCard.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/components/VideoCard.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-4",
-        "summary": "On the Video Player page, display the thumbnail as the poster/preview image shown before the video begins playing.",
-        "status": "implemented",
+        "summary": "In the VideoPlayerPage, use the uploaded thumbnail as the video poster image when available so it displays before the video starts playing.",
+        "status": "missing",
         "plannedFiles": [
           "frontend/src/pages/VideoPlayerPage.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/VideoPlayerPage.tsx"
-        ]
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/VideoCard.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/ProfilePage.tsx",
-    "frontend/src/pages/UploadVideoPage.tsx",
-    "frontend/src/pages/VideoPlayerPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
