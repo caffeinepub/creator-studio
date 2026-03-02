@@ -4,29 +4,45 @@ import { ExternalBlob, Video, UserProfile } from '../backend';
 import { Principal } from '@dfinity/principal';
 
 export function useListVideos() {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<Video[]>({
+  const query = useQuery<Video[]>({
     queryKey: ['videos'],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.listVideos();
+      const videos = await actor.listVideos();
+      return videos;
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
+    // Refetch to pick up thumbnail updates
+    staleTime: 0,
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }
 
 export function useGetVideo(id: string) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<Video | null>({
+  const query = useQuery<Video | null>({
     queryKey: ['video', id],
     queryFn: async () => {
       if (!actor) return null;
       return actor.getVideo(id);
     },
-    enabled: !!actor && !isFetching && !!id,
+    enabled: !!actor && !actorFetching && !!id,
+    staleTime: 0,
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }
 
 export function useGetCallerUserProfile() {
@@ -112,8 +128,10 @@ export function useUploadThumbnail() {
       if (!actor) throw new Error('Actor not available');
       return actor.uploadThumbnail(videoId, thumbnail);
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      // Invalidate both the list and the specific video so thumbnails appear immediately
       queryClient.invalidateQueries({ queryKey: ['videos'] });
+      queryClient.invalidateQueries({ queryKey: ['video', variables.videoId] });
     },
   });
 }

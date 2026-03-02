@@ -1,4 +1,47 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-add-an-about-florida-dave-section-to-the-frontend-that-displays-a-short-bio-paragraph-describing-florida-dave-as-a-40-year-old-entrepreneur-building-ideas-publicly-spanning-content-creation-and-domain-investing-and-documenting-the-journey-toward-location-freedom-and-beach-living",
+      "featureTitle": "Add an 'About Florida Dave' section to the frontend that displays a short bio paragraph describing Florida Dave as a 40-year-old entrepreneur building ideas publicly — spanning content creation and domain investing — and documenting the journey toward location freedom and beach living.",
+      "files": [
+        "frontend/src/components/AboutSection.tsx",
+        "frontend/src/pages/VideoFeedPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-subtle-decorative-wave-shaped-svg-divider-line-above-or-below-the-about-florida-dave-section-to-visually-separate-it-from-adjacent-content",
+      "featureTitle": "Add a subtle decorative wave-shaped SVG divider line above or below the About Florida Dave section to visually separate it from adjacent content.",
+      "files": [
+        "frontend/src/components/AboutSection.tsx",
+        "frontend/src/components/WaveDivider.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

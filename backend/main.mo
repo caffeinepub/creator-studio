@@ -9,8 +9,6 @@ import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 
-// Apply migration on upgrade
-
 actor {
   include MixinStorage();
 
@@ -25,7 +23,17 @@ actor {
     uploadTimestamp : Time.Time;
     file : Storage.ExternalBlob;
     viewCount : Nat;
-    thumbnail : ?Storage.ExternalBlob; // New thumbnail field
+    thumbnail : ?Storage.ExternalBlob;
+  };
+
+  public type VideoMetadata = {
+    id : Text;
+    title : Text;
+    description : Text;
+    duration : Nat;
+    uploadTimestamp : Time.Time;
+    viewCount : Nat;
+    thumbnail : ?Storage.ExternalBlob;
   };
 
   public type UserProfile = {
@@ -46,7 +54,7 @@ actor {
     description : Text,
     duration : Nat,
     file : Storage.ExternalBlob,
-    thumbnail : ?Storage.ExternalBlob, // Now accepts an optional thumbnail
+    thumbnail : ?Storage.ExternalBlob,
   ) : async UploadResult {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       return #error("Unauthorized: Only users can upload videos");
@@ -64,7 +72,7 @@ actor {
       uploadTimestamp = Time.now();
       file;
       viewCount = 0;
-      thumbnail; // Store thumbnail if provided
+      thumbnail;
     };
 
     videos.add(id, video);
@@ -123,7 +131,6 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // New Follower Functionality
   let followers = Map.empty<Principal, [Principal]>();
 
   public shared ({ caller }) func followUser(target : Principal) : async Bool {
@@ -189,4 +196,3 @@ actor {
     };
   };
 };
-

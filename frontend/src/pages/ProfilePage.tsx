@@ -17,6 +17,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 // localStorage key for persisting the creator's principal
 const CREATOR_PRINCIPAL_KEY = 'floridadave_creator_principal';
 
+const PLACEHOLDER = '/assets/generated/video-placeholder.dim_400x600.png';
+
+function getSafeThumbnailUrl(thumbnail: { getDirectURL?: () => string } | undefined | null): string {
+  if (!thumbnail) return PLACEHOLDER;
+  try {
+    if (typeof thumbnail.getDirectURL === 'function') {
+      return thumbnail.getDirectURL();
+    }
+  } catch {
+    // fall through
+  }
+  return PLACEHOLDER;
+}
+
 export default function ProfilePage() {
   const { identity } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
@@ -80,6 +94,8 @@ export default function ProfilePage() {
 
   const videoCount = videos?.length ?? 0;
   const displayFollowerCount = followerCount !== undefined ? Number(followerCount) : 0;
+  // Sum up total views across all videos
+  const totalViews = videos?.reduce((sum, v) => sum + Number(v.viewCount), 0) ?? 0;
 
   return (
     <TooltipProvider>
@@ -212,10 +228,14 @@ export default function ProfilePage() {
 
               <div className="flex items-center gap-2 text-sm">
                 <Heart className="w-4 h-4 text-primary" />
-                <span className="font-semibold text-foreground">
-                  {videoCount * 12}
-                </span>
-                <span className="text-muted-foreground">Likes</span>
+                {videosLoading ? (
+                  <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="font-semibold text-foreground">
+                    {new Intl.NumberFormat('en-US').format(totalViews)}
+                  </span>
+                )}
+                <span className="text-muted-foreground">Views</span>
               </div>
             </div>
           </div>
@@ -253,9 +273,10 @@ export default function ProfilePage() {
                   className="aspect-[9/16] rounded-xl overflow-hidden bg-muted relative group cursor-pointer"
                 >
                   <img
-                    src={video.thumbnail ? video.thumbnail.getDirectURL() : '/assets/generated/video-placeholder.dim_400x600.png'}
+                    src={getSafeThumbnailUrl(video.thumbnail)}
                     alt={video.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end p-3">
                     <p className="text-white text-xs font-medium line-clamp-2">{video.title}</p>

@@ -1,53 +1,46 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Video platform project with thumbnail upload support for videos.",
+  "summary": "Building a personal platform for Florida Dave — a 40-year-old entrepreneur — featuring video content with likes/views tracking, and a personal About section highlighting content creation, domain investing, and a journey toward location freedom and beach living.",
   "architectural_notes": [],
-  "known_issues": [],
+  "known_issues": [
+    "Videos, likes, and view counts not displaying correctly — multiple build attempts have failed"
+  ],
   "isFixRequest": false,
-  "existing_features": [],
+  "existing_features": [
+    {
+      "id": "feature-add-an-about-florida-dave-section-to-the-frontend-that-displays-a-short-bio-paragraph-describing-florida-dave-as-a-40-year-old-entrepreneur-building-ideas-publicly-spanning-content-creation-and-domain-investing-and-documenting-the-journey-toward-location-freedom-and-beach-living",
+      "title": "Add an 'About Florida Dave' section to the frontend that displays a short bio paragraph describing Florida Dave as a 40-year-old entrepreneur building ideas publicly — spanning content creation and domain investing — and documenting the journey toward location freedom and beach living.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-subtle-decorative-wave-shaped-svg-divider-line-above-or-below-the-about-florida-dave-section-to-visually-separate-it-from-adjacent-content",
+      "title": "Add a subtle decorative wave-shaped SVG divider line above or below the About Florida Dave section to visually separate it from adjacent content.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    }
+  ],
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Allow users to upload video thumbnails",
+      "summary": "About section for Florida Dave with short bio paragraph and wave-design divider line",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "On the Upload Video page, provide a file input that allows authenticated users to select and upload an optional image file as a thumbnail for their video. The selected thumbnail should be sent to the backend alongside the video blob.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Persist an optional thumbnail blob field on Video records in the backend actor. Expose an endpoint (or extend the existing video upload endpoint) that accepts and stores the thumbnail blob. Return the thumbnail alongside video metadata when videos are retrieved.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "In the VideoCard component, display the uploaded thumbnail image when available. If no thumbnail exists, fall back to the current placeholder or default display.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "In the VideoPlayerPage, use the uploaded thumbnail as the video poster image when available so it displays before the video starts playing.",
-      "reqIds": [
-        "REQ-4"
-      ],
+      "summary": "Display all user videos with likes and view counts",
+      "reqIds": [],
       "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "Enable video thumbnail uploads",
+  "projectName": "Florida Dave",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

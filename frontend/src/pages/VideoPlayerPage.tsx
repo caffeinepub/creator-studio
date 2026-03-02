@@ -12,6 +12,18 @@ function viewLabel(count: bigint): string {
   return count === 1n ? '1 view' : `${formatViewCount(count)} views`;
 }
 
+function getPosterUrl(video: { thumbnail?: { getDirectURL?: () => string } } | null): string | undefined {
+  if (!video?.thumbnail) return undefined;
+  try {
+    if (typeof video.thumbnail.getDirectURL === 'function') {
+      return video.thumbnail.getDirectURL();
+    }
+  } catch {
+    // no poster
+  }
+  return undefined;
+}
+
 export default function VideoPlayerPage() {
   const { id } = useParams({ from: '/video/$id' });
   const navigate = useNavigate();
@@ -34,6 +46,7 @@ export default function VideoPlayerPage() {
         <Skeleton className="h-10 w-32 mb-6" />
         <Skeleton className="aspect-video w-full rounded-lg mb-6" />
         <Skeleton className="h-8 w-3/4 mb-4" />
+        <Skeleton className="h-6 w-48 mb-4" />
         <Skeleton className="h-20 w-full" />
       </div>
     );
@@ -53,7 +66,7 @@ export default function VideoPlayerPage() {
   }
 
   const videoUrl = video.file.getDirectURL();
-  const posterUrl = video.thumbnail ? video.thumbnail.getDirectURL() : undefined;
+  const posterUrl = getPosterUrl(video);
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -82,20 +95,22 @@ export default function VideoPlayerPage() {
         <div className="p-6">
           <h1 className="text-3xl font-bold mb-4">{video.title}</h1>
           
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               <span>{formatDate(video.uploadTimestamp)}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              <span>{viewLabel(video.viewCount)}</span>
+            <div className="flex items-center gap-2 bg-muted px-3 py-1 rounded-full">
+              <Eye className="h-4 w-4 text-primary" />
+              <span className="font-medium text-foreground">{viewLabel(video.viewCount)}</span>
             </div>
           </div>
 
-          <div className="prose prose-sm max-w-none">
-            <p className="text-foreground whitespace-pre-wrap">{video.description}</p>
-          </div>
+          {video.description && (
+            <div className="prose prose-sm max-w-none">
+              <p className="text-foreground whitespace-pre-wrap">{video.description}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

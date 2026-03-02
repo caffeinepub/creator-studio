@@ -1,53 +1,47 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Enable video thumbnail uploads",
+  "title": "Add About Florida Dave section with wave divider",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add optional thumbnail file input to the Upload Video page, with preview and submission alongside video blob",
+      "summary": "Add an 'About Florida Dave' section with biographical content to the frontend",
       "acceptanceCriteria": [
-        "The upload form includes a clearly labelled optional thumbnail file input accepting common image formats (PNG, JPG, GIF, WebP).",
-        "A preview of the selected thumbnail image is shown before submission.",
-        "On form submission, the thumbnail blob is passed to the upload mutation alongside the video.",
-        "If no thumbnail is selected, the upload proceeds without one (thumbnail remains optional)."
+        "A clearly labeled 'About Florida Dave' section is visible on the app (e.g., on the home/feed page or a dedicated About page/section).",
+        "The section contains a short paragraph with the described content: age, entrepreneurship, content creation, domain investing, location freedom, and beach living.",
+        "Text is legible and styled consistently with the rest of the app's design system."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/UploadVideoPage.tsx",
+          "path": "frontend/src/components/AboutSection.tsx",
+          "operation": "create",
+          "description": "Create a new AboutSection component that displays the Florida Dave bio paragraph with appropriate heading and styling consistent with the app's design system using Tailwind classes and OKLCH color tokens."
+        },
+        {
+          "path": "frontend/src/pages/VideoFeedPage.tsx",
           "operation": "modify",
-          "description": "Add a file input for optional thumbnail selection (accepting PNG, JPG, GIF, WebP). Add state to store the selected thumbnail file and display a preview image when a file is selected. Modify the form submission handler to convert the thumbnail file to ExternalBlob using ExternalBlob.fromBytes() and pass it as the thumbnail argument to the uploadVideo mutation. Ensure that if no thumbnail is selected, null is passed instead. Verify the blob-storage component's usage instructions before implementing the ExternalBlob conversion."
+          "description": "Import and render the AboutSection component within the VideoFeedPage layout, positioning it above or below the video grid to make it visible on the main feed page."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Display uploaded thumbnail in VideoCard component with fallback to placeholder when unavailable",
+      "id": "REQ-2",
+      "summary": "Add a subtle wave-shaped SVG divider adjacent to the About section",
       "acceptanceCriteria": [
-        "VideoCard renders the thumbnail image when a thumbnail blob is present on the video record.",
-        "VideoCard renders a sensible fallback (placeholder or gradient) when no thumbnail is available.",
-        "Thumbnail images are displayed at consistent, appropriate dimensions within the card layout."
+        "A wave-shaped SVG or CSS divider line is rendered adjacent to the About section.",
+        "The divider is subtle — not overpowering — and harmonizes with the existing color palette.",
+        "The wave divider spans the full width of the section container."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/VideoCard.tsx",
-          "operation": "modify",
-          "description": "Check if the video has a thumbnail field. If present, use thumbnail.getDirectURL() to obtain the thumbnail URL and display it as the card image. If no thumbnail exists, fall back to the existing placeholder image at frontend/public/assets/generated/video-placeholder.dim_400x600.png. Ensure consistent thumbnail dimensions within the card layout. Verify the blob-storage component's usage instructions before implementing the getDirectURL() call."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Use uploaded thumbnail as video poster image in VideoPlayerPage",
-      "acceptanceCriteria": [
-        "The video element's poster attribute is set to the thumbnail data URL when a thumbnail blob is present.",
-        "When no thumbnail is available, the video element has no poster or uses the existing fallback behaviour."
-      ],
-      "file_operations": [
+          "path": "frontend/src/components/WaveDivider.tsx",
+          "operation": "create",
+          "description": "Create a WaveDivider component that renders a subtle wave-shaped SVG divider using inline SVG with path elements. Style it with colors from the app's OKLCH color palette to ensure visual harmony. Make the divider responsive and full-width."
+        },
         {
-          "path": "frontend/src/pages/VideoPlayerPage.tsx",
+          "path": "frontend/src/components/AboutSection.tsx",
           "operation": "modify",
-          "description": "Check if the fetched video has a thumbnail field. If present, call thumbnail.getDirectURL() to obtain the thumbnail URL and set it as the poster attribute on the video element. If no thumbnail exists, omit the poster attribute or retain the current default behaviour. Verify the blob-storage component's usage instructions before implementing the getDirectURL() call."
+          "description": "Import and integrate the WaveDivider component into the AboutSection, positioning it above or below the bio content to visually separate the About section from adjacent content."
         }
       ]
     }

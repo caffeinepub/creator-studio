@@ -2,6 +2,7 @@ import { Video } from '../backend';
 import { Card, CardContent } from '@/components/ui/card';
 import { Play, Eye } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
 
 interface VideoCardProps {
   video: Video;
@@ -15,8 +16,22 @@ function viewLabel(count: bigint): string {
   return count === 1n ? '1 view' : `${formatViewCount(count)} views`;
 }
 
+const PLACEHOLDER = '/assets/generated/video-placeholder.dim_400x600.png';
+
+function getThumbnailUrl(video: Video): string {
+  try {
+    if (video.thumbnail && typeof video.thumbnail.getDirectURL === 'function') {
+      return video.thumbnail.getDirectURL();
+    }
+  } catch {
+    // fall through to placeholder
+  }
+  return PLACEHOLDER;
+}
+
 export default function VideoCard({ video }: VideoCardProps) {
   const navigate = useNavigate();
+  const [imgSrc, setImgSrc] = useState<string>(() => getThumbnailUrl(video));
 
   const handleClick = () => {
     navigate({ to: '/video/$id', params: { id: video.id } });
@@ -27,10 +42,6 @@ export default function VideoCard({ video }: VideoCardProps) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const thumbnailSrc = video.thumbnail
-    ? video.thumbnail.getDirectURL()
-    : '/assets/generated/video-placeholder.dim_400x600.png';
-
   return (
     <Card 
       className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-2"
@@ -39,9 +50,10 @@ export default function VideoCard({ video }: VideoCardProps) {
       <CardContent className="p-0">
         <div className="relative aspect-[9/16] bg-muted overflow-hidden">
           <img 
-            src={thumbnailSrc}
+            src={imgSrc}
             alt={video.title}
             className="w-full h-full object-cover"
+            onError={() => setImgSrc(PLACEHOLDER)}
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <div className="bg-primary rounded-full p-4">

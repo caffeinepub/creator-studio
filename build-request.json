@@ -1,90 +1,54 @@
 {
   "kind": "build_request",
-  "title": "Enable video thumbnail uploads",
+  "title": "Add About Florida Dave section with wave divider",
+  "projectName": "Florida Dave",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "On the Upload Video page, provide a file input that allows authenticated users to select and upload an optional image file as a thumbnail for their video. The selected thumbnail should be sent to the backend alongside the video blob.",
+      "text": "Add an 'About Florida Dave' section to the frontend that displays a short bio paragraph describing Florida Dave as a 40-year-old entrepreneur building ideas publicly — spanning content creation and domain investing — and documenting the journey toward location freedom and beach living.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-latest"
         ],
         "quotes": [
-          "can I upload video thumbnails?"
+          "Short paragraph explaining that Florida Dave is a 40-year-old entrepreneur building ideas publicly — from content creation to domain investing — documenting the journey toward location freedom and beach living."
         ]
       },
       "acceptanceCriteria": [
-        "The upload form includes a clearly labelled optional thumbnail file input accepting common image formats (PNG, JPG, GIF, WebP).",
-        "A preview of the selected thumbnail image is shown before submission.",
-        "On form submission, the thumbnail blob is passed to the upload mutation alongside the video.",
-        "If no thumbnail is selected, the upload proceeds without one (thumbnail remains optional)."
+        "A clearly labeled 'About Florida Dave' section is visible on the app (e.g., on the home/feed page or a dedicated About page/section).",
+        "The section contains a short paragraph with the described content: age, entrepreneurship, content creation, domain investing, location freedom, and beach living.",
+        "Text is legible and styled consistently with the rest of the app's design system."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Persist an optional thumbnail blob field on Video records in the backend actor. Expose an endpoint (or extend the existing video upload endpoint) that accepts and stores the thumbnail blob. Return the thumbnail alongside video metadata when videos are retrieved.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-5"
-        ],
-        "quotes": [
-          "can I upload video thumbnails?"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Video records include a nullable/optional thumbnail field storing raw blob data.",
-        "The upload endpoint accepts an optional thumbnail argument and stores it on the video record.",
-        "Video retrieval endpoints return the thumbnail blob (or null) as part of the video data.",
-        "Existing videos without thumbnails are unaffected and return null for the thumbnail field."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "In the VideoCard component, display the uploaded thumbnail image when available. If no thumbnail exists, fall back to the current placeholder or default display.",
+      "text": "Add a subtle decorative wave-shaped SVG divider line above or below the About Florida Dave section to visually separate it from adjacent content.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-latest"
         ],
         "quotes": [
-          "can I upload video thumbnails?"
+          "Include subtle divider line with wave design."
         ]
       },
       "acceptanceCriteria": [
-        "VideoCard renders the thumbnail image when a thumbnail blob is present on the video record.",
-        "VideoCard renders a sensible fallback (placeholder or gradient) when no thumbnail is available.",
-        "Thumbnail images are displayed at consistent, appropriate dimensions within the card layout."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "In the VideoPlayerPage, use the uploaded thumbnail as the video poster image when available so it displays before the video starts playing.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-5"
-        ],
-        "quotes": [
-          "can I upload video thumbnails?"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The video element's poster attribute is set to the thumbnail data URL when a thumbnail blob is present.",
-        "When no thumbnail is available, the video element has no poster or uses the existing fallback behaviour."
+        "A wave-shaped SVG or CSS divider line is rendered adjacent to the About section.",
+        "The divider is subtle — not overpowering — and harmonizes with the existing color palette.",
+        "The wave divider spans the full width of the section container."
       ]
     }
   ],
   "constraints": [
-    "Thumbnail upload must remain optional — videos without thumbnails must continue to work.",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
+    "Do not modify files under frontend/src/hooks/ (useInternetIdentity.ts, useActor.ts) or frontend/src/main.tsx.",
+    "Do not alter existing backend logic or data models."
   ],
   "nonGoals": [
-    "Automatic thumbnail generation from video frames.",
-    "Thumbnail cropping or editing UI.",
-    "Changing the video upload size or duration validation logic."
+    "Fixing the existing video/likes/view count display issue (separate known issue).",
+    "Adding a new backend endpoint or storing About content in the canister.",
+    "Creating a fully separate About page with routing — the section can be embedded in an existing page."
   ],
   "imageRequirements": {
     "required": [],
