@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-move-the-aboutsection-component-so-it-appears-at-the-very-top-of-the-videofeedpage-above-the-video-grid-rather-than-below-it",
-      "featureTitle": "Move the AboutSection component so it appears at the very top of the VideoFeedPage, above the video grid, rather than below it.",
+      "featureId": "feature-investigate-and-fix-the-issue-where-videos-fail-to-load-and-display-on-the-videoplayerpage-ensure-the-video-element-is-correctly-sourced-from-the-backend-the-video-url-or-blob-is-properly-constructed-and-passed-to-the-html-video-element-and-the-player-renders-and-plays-the-video-without-errors",
+      "featureTitle": "Investigate and fix the issue where videos fail to load and display on the VideoPlayerPage. Ensure the video element is correctly sourced from the backend, the video URL or blob is properly constructed and passed to the HTML video element, and the player renders and plays the video without errors.",
       "files": [
-        "frontend/src/pages/VideoFeedPage.tsx"
+        "frontend/src/pages/VideoPlayerPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",

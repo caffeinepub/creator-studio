@@ -1,6 +1,7 @@
 import { useListVideos } from '../hooks/useQueries';
 import VideoCard from '../components/VideoCard';
 import AboutSection from '../components/AboutSection';
+import CameoSection from '../components/CameoSection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Video as VideoIcon } from 'lucide-react';
 
@@ -11,6 +12,7 @@ export default function VideoFeedPage() {
     return (
       <div>
         <AboutSection />
+        <CameoSection />
         <div className="mb-8">
           <Skeleton className="h-10 w-48 mb-2" />
           <Skeleton className="h-5 w-72" />
@@ -32,6 +34,7 @@ export default function VideoFeedPage() {
     return (
       <div>
         <AboutSection />
+        <CameoSection />
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="bg-muted rounded-full p-6 mb-6">
             <VideoIcon className="h-12 w-12 text-muted-foreground" />
@@ -48,6 +51,7 @@ export default function VideoFeedPage() {
   return (
     <div>
       <AboutSection />
+      <CameoSection />
 
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Video Feed</h1>

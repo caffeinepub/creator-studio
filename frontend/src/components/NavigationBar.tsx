@@ -14,8 +14,8 @@ export default function NavigationBar() {
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img 
             src="/assets/generated/app-logo.dim_300x100.png" 
-            alt="Creator Studio" 
-            className="h-10 w-auto"
+            alt="Florida Dave Network" 
+            className="h-12 w-auto"
           />
         </Link>
         

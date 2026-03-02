@@ -1,14 +1,16 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Personal website for Florida Dave featuring an About section at the top with personal info.",
+  "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Video content not loading/displaying for the user"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-move-the-aboutsection-component-so-it-appears-at-the-very-top-of-the-videofeedpage-above-the-video-grid-rather-than-below-it",
-      "title": "Move the AboutSection component so it appears at the very top of the VideoFeedPage, above the video grid, rather than below it.",
+      "id": "feature-investigate-and-fix-the-issue-where-videos-fail-to-load-and-display-on-the-videoplayerpage-ensure-the-video-element-is-correctly-sourced-from-the-backend-the-video-url-or-blob-is-properly-constructed-and-passed-to-the-html-video-element-and-the-player-renders-and-plays-the-video-without-errors",
+      "title": "Investigate and fix the issue where videos fail to load and display on the VideoPlayerPage. Ensure the video element is correctly sourced from the backend, the video URL or blob is properly constructed and passed to the HTML video element, and the player renders and plays the video without errors.",
       "reqIds": [
         "REQ-1"
       ],
@@ -17,14 +19,15 @@
   ],
   "new_feature_requests": [
     {
-      "id": "AR-1",
-      "summary": "Add About section at the top of the page with personal info",
-      "reqIds": [],
+      "id": "AR-2",
+      "summary": "Ensure the video feed (VideoFeedPage) correctly displays video thumbnails or fallback placeholders for all uploaded videos, so users can identify and navigate to their content.",
+      "reqIds": [
+        "REQ-2"
+      ],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Florida Dave",
+  "projectName": "Fix video not loading/displaying on the video player page",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

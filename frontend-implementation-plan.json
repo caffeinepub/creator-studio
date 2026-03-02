@@ -1,22 +1,37 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Move About section to the top of the page",
+  "title": "Fix video not loading/displaying on the video player page",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Reorder VideoFeedPage to display AboutSection above the video grid instead of below it",
+      "summary": "Fix video loading and display on VideoPlayerPage by ensuring proper blob URL construction and video element configuration",
       "acceptanceCriteria": [
-        "The AboutSection component renders above the video grid on the VideoFeedPage.",
-        "All existing personal bio content (Florida Dave's about info) is preserved and visible in the section.",
-        "The WaveDivider components still separate the About section from adjacent content appropriately.",
-        "The video grid continues to render correctly below the About section."
+        "A video uploaded to the platform is visible and playable on the VideoPlayerPage.",
+        "The video element renders without a blank/black screen when navigating to a video's detail page.",
+        "No console errors related to video src, CORS, or missing blob/URL appear when loading a video.",
+        "The video loads within a reasonable time after the page renders."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/VideoFeedPage.tsx",
+          "path": "frontend/src/pages/VideoPlayerPage.tsx",
           "operation": "modify",
-          "description": "Move the AboutSection component to render before the video grid container. Ensure the AboutSection appears immediately after the page's opening fragment or container, followed by the loading skeletons/video cards/empty state. Preserve all existing WaveDivider components and bio content within AboutSection."
+          "description": "Fix the video element to use the ExternalBlob's getDirectURL() method for the src attribute instead of attempting to construct blob URLs manually. Add proper error handling for missing or invalid video files. Include loading states while the video metadata is being fetched. Ensure the video element has appropriate attributes (controls, preload) for proper playback. Add error event handlers to capture and display video loading failures to the user."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Ensure VideoFeedPage displays video thumbnails or fallback placeholders correctly for all uploaded videos",
+      "acceptanceCriteria": [
+        "Each VideoCard on the feed shows either a thumbnail image or a styled fallback placeholder.",
+        "Clicking a VideoCard navigates to the correct VideoPlayerPage for that video."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/VideoCard.tsx",
+          "operation": "modify",
+          "description": "Update the VideoCard component to properly handle optional thumbnail ExternalBlobs. When a thumbnail exists, use getDirectURL() to display it. When thumbnail is null or undefined, display the fallback placeholder image at frontend/public/assets/generated/video-placeholder.dim_400x600.png. Add error handling for thumbnail loading failures with fallback to the placeholder. Ensure the image element has proper alt text and loading attributes for accessibility and performance."
         }
       ]
     }
