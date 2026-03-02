@@ -10,6 +10,7 @@ export default function VideoFeedPage() {
   if (isLoading) {
     return (
       <div>
+        <AboutSection />
         <div className="mb-8">
           <Skeleton className="h-10 w-48 mb-2" />
           <Skeleton className="h-5 w-72" />
@@ -46,6 +47,8 @@ export default function VideoFeedPage() {
 
   return (
     <div>
+      <AboutSection />
+
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Video Feed</h1>
         <p className="text-muted-foreground">Discover amazing content from our creator</p>
@@ -56,8 +59,6 @@ export default function VideoFeedPage() {
           <VideoCard key={video.id} video={video} />
         ))}
       </div>
-
-      <AboutSection />
     </div>
   );
 }

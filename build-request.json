@@ -1,54 +1,34 @@
 {
   "kind": "build_request",
-  "title": "Add About Florida Dave section with wave divider",
+  "title": "Move About section to the top of the page",
   "projectName": "Florida Dave",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add an 'About Florida Dave' section to the frontend that displays a short bio paragraph describing Florida Dave as a 40-year-old entrepreneur building ideas publicly — spanning content creation and domain investing — and documenting the journey toward location freedom and beach living.",
+      "text": "Move the AboutSection component so it appears at the very top of the VideoFeedPage, above the video grid, rather than below it.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-4"
         ],
         "quotes": [
-          "Short paragraph explaining that Florida Dave is a 40-year-old entrepreneur building ideas publicly — from content creation to domain investing — documenting the journey toward location freedom and beach living."
+          "can you make an about section at the top with my abt info in that section?"
         ]
       },
       "acceptanceCriteria": [
-        "A clearly labeled 'About Florida Dave' section is visible on the app (e.g., on the home/feed page or a dedicated About page/section).",
-        "The section contains a short paragraph with the described content: age, entrepreneurship, content creation, domain investing, location freedom, and beach living.",
-        "Text is legible and styled consistently with the rest of the app's design system."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Add a subtle decorative wave-shaped SVG divider line above or below the About Florida Dave section to visually separate it from adjacent content.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "Include subtle divider line with wave design."
-        ]
-      },
-      "acceptanceCriteria": [
-        "A wave-shaped SVG or CSS divider line is rendered adjacent to the About section.",
-        "The divider is subtle — not overpowering — and harmonizes with the existing color palette.",
-        "The wave divider spans the full width of the section container."
+        "The AboutSection component renders above the video grid on the VideoFeedPage.",
+        "All existing personal bio content (Florida Dave's about info) is preserved and visible in the section.",
+        "The WaveDivider components still separate the About section from adjacent content appropriately.",
+        "The video grid continues to render correctly below the About section."
       ]
     }
   ],
-  "constraints": [
-    "Do not modify files under frontend/src/hooks/ (useInternetIdentity.ts, useActor.ts) or frontend/src/main.tsx.",
-    "Do not alter existing backend logic or data models."
-  ],
+  "constraints": [],
   "nonGoals": [
-    "Fixing the existing video/likes/view count display issue (separate known issue).",
-    "Adding a new backend endpoint or storing About content in the canister.",
-    "Creating a fully separate About page with routing — the section can be embedded in an existing page."
+    "Changing the content or copy inside the About section.",
+    "Adding new social links or contact sections.",
+    "Modifying the backend."
   ],
   "imageRequirements": {
     "required": [],

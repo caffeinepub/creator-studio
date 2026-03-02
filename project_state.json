@@ -1,26 +1,16 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Building a personal platform for Florida Dave — a 40-year-old entrepreneur — featuring video content with likes/views tracking, and a personal About section highlighting content creation, domain investing, and a journey toward location freedom and beach living.",
+  "summary": "Personal website for Florida Dave featuring an About section at the top with personal info.",
   "architectural_notes": [],
-  "known_issues": [
-    "Videos, likes, and view counts not displaying correctly — multiple build attempts have failed"
-  ],
+  "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-add-an-about-florida-dave-section-to-the-frontend-that-displays-a-short-bio-paragraph-describing-florida-dave-as-a-40-year-old-entrepreneur-building-ideas-publicly-spanning-content-creation-and-domain-investing-and-documenting-the-journey-toward-location-freedom-and-beach-living",
-      "title": "Add an 'About Florida Dave' section to the frontend that displays a short bio paragraph describing Florida Dave as a 40-year-old entrepreneur building ideas publicly — spanning content creation and domain investing — and documenting the journey toward location freedom and beach living.",
+      "id": "feature-move-the-aboutsection-component-so-it-appears-at-the-very-top-of-the-videofeedpage-above-the-video-grid-rather-than-below-it",
+      "title": "Move the AboutSection component so it appears at the very top of the VideoFeedPage, above the video grid, rather than below it.",
       "reqIds": [
         "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-subtle-decorative-wave-shaped-svg-divider-line-above-or-below-the-about-florida-dave-section-to-visually-separate-it-from-adjacent-content",
-      "title": "Add a subtle decorative wave-shaped SVG divider line above or below the About Florida Dave section to visually separate it from adjacent content.",
-      "reqIds": [
-        "REQ-2"
       ],
       "version": 1
     }
@@ -28,13 +18,7 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "About section for Florida Dave with short bio paragraph and wave-design divider line",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Display all user videos with likes and view counts",
+      "summary": "Add About section at the top of the page with personal info",
       "reqIds": [],
       "status": "pending"
     }

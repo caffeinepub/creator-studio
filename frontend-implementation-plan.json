@@ -1,47 +1,22 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add About Florida Dave section with wave divider",
+  "title": "Move About section to the top of the page",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add an 'About Florida Dave' section with biographical content to the frontend",
+      "summary": "Reorder VideoFeedPage to display AboutSection above the video grid instead of below it",
       "acceptanceCriteria": [
-        "A clearly labeled 'About Florida Dave' section is visible on the app (e.g., on the home/feed page or a dedicated About page/section).",
-        "The section contains a short paragraph with the described content: age, entrepreneurship, content creation, domain investing, location freedom, and beach living.",
-        "Text is legible and styled consistently with the rest of the app's design system."
+        "The AboutSection component renders above the video grid on the VideoFeedPage.",
+        "All existing personal bio content (Florida Dave's about info) is preserved and visible in the section.",
+        "The WaveDivider components still separate the About section from adjacent content appropriately.",
+        "The video grid continues to render correctly below the About section."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/components/AboutSection.tsx",
-          "operation": "create",
-          "description": "Create a new AboutSection component that displays the Florida Dave bio paragraph with appropriate heading and styling consistent with the app's design system using Tailwind classes and OKLCH color tokens."
-        },
         {
           "path": "frontend/src/pages/VideoFeedPage.tsx",
           "operation": "modify",
-          "description": "Import and render the AboutSection component within the VideoFeedPage layout, positioning it above or below the video grid to make it visible on the main feed page."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Add a subtle wave-shaped SVG divider adjacent to the About section",
-      "acceptanceCriteria": [
-        "A wave-shaped SVG or CSS divider line is rendered adjacent to the About section.",
-        "The divider is subtle — not overpowering — and harmonizes with the existing color palette.",
-        "The wave divider spans the full width of the section container."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/WaveDivider.tsx",
-          "operation": "create",
-          "description": "Create a WaveDivider component that renders a subtle wave-shaped SVG divider using inline SVG with path elements. Style it with colors from the app's OKLCH color palette to ensure visual harmony. Make the divider responsive and full-width."
-        },
-        {
-          "path": "frontend/src/components/AboutSection.tsx",
-          "operation": "modify",
-          "description": "Import and integrate the WaveDivider component into the AboutSection, positioning it above or below the bio content to visually separate the About section from adjacent content."
+          "description": "Move the AboutSection component to render before the video grid container. Ensure the AboutSection appears immediately after the page's opening fragment or container, followed by the loading skeletons/video cards/empty state. Preserve all existing WaveDivider components and bio content within AboutSection."
         }
       ]
     }
