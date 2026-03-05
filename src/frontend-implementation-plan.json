@@ -1,0 +1,149 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Creator Studio - TikTok-style Video Platform Frontend Implementation",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Implement owner authentication using Internet Identity to restrict video uploads to a single authorized user",
+      "acceptanceCriteria": [
+        "Owner can authenticate using Internet Identity",
+        "Only authenticated owner principal can access upload functionality",
+        "Unauthenticated users can view videos but cannot upload"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add authentication state management and conditional rendering to show upload functionality only to authenticated owner (admin role). Use the authorization component to handle authentication checks. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/LoginButton.tsx",
+          "operation": "create",
+          "description": "Create a login button component using Internet Identity integration from the authorization component. Handle login/logout actions and authentication state. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/ProfileSetupModal.tsx",
+          "operation": "create",
+          "description": "Create a profile setup modal that prompts first-time users to enter their name using the authorization component's user profile system. Show modal only when user is authenticated but has no profile. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useGetCallerUserProfile.ts",
+          "operation": "create",
+          "description": "Create a custom hook to fetch the current user's profile using the authorization component's getCallerUserProfile backend method. Implement proper loading states to prevent modal flash. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useSaveCallerUserProfile.ts",
+          "operation": "create",
+          "description": "Create a custom hook to save the current user's profile using the authorization component's saveCallerUserProfile backend method. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/UploadVideoPage.tsx",
+          "operation": "create",
+          "description": "Create an upload page with a form accepting video file input, title, and description. Use the blob-storage component's ExternalBlob.fromBytes() and withUploadProgress() to handle video file upload with progress tracking. Call the backend uploadVideo method with the video data. Guard this page to only show for authenticated admin users using the authorization component. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useUploadVideo.ts",
+          "operation": "create",
+          "description": "Create a custom hook to handle video upload mutation using the backend uploadVideo method. Manage upload state and error handling. Use the blob-storage component for file handling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/UploadSuccessModal.tsx",
+          "operation": "create",
+          "description": "Create a success modal component that displays after successful video upload. Show confirmation message and provide navigation back to video feed."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Build a TikTok-style profile page displaying the creator's profile information including profile picture, username, bio, and video count statistics",
+      "acceptanceCriteria": [
+        "Profile page displays creator profile picture",
+        "Profile shows username and bio text",
+        "Video count statistic is visible",
+        "Layout follows TikTok-style vertical profile design"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ProfilePage.tsx",
+          "operation": "create",
+          "description": "Create a TikTok-style profile page component displaying creator information. Show profile picture using the generated image at frontend/public/assets/generated/profile-avatar.dim_200x200.png, username from user profile, bio text, and video count statistic. Use vertical layout with profile header section at top."
+        },
+        {
+          "path": "frontend/src/hooks/useListVideos.ts",
+          "operation": "create",
+          "description": "Create a custom hook to fetch all videos from the backend using the listVideos method. Return video count for profile statistics."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Create a video feed interface where fans can browse and watch uploaded videos in a scrollable grid or vertical feed layout",
+      "acceptanceCriteria": [
+        "Videos display in a browsable feed/grid layout",
+        "Clicking a video opens a player view",
+        "Video player supports play/pause controls",
+        "Feed is accessible to all users without authentication"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/VideoFeedPage.tsx",
+          "operation": "create",
+          "description": "Create the main video feed page displaying videos in a grid layout. Fetch videos using the backend listVideos method. Each video card shows thumbnail (use frontend/public/assets/generated/video-placeholder.dim_400x600.png for empty states), title, and basic metadata. Make cards clickable to navigate to individual video player. This page is publicly accessible without authentication."
+        },
+        {
+          "path": "frontend/src/pages/VideoPlayerPage.tsx",
+          "operation": "create",
+          "description": "Create a video player page that displays a single video with full controls. Use the blob-storage component to access video files via ExternalBlob.getDirectURL() for streaming. Include play/pause controls, video title, and description. Use the getVideo backend method to fetch video details by id. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/VideoCard.tsx",
+          "operation": "create",
+          "description": "Create a reusable video card component displaying video thumbnail, title, and metadata. Used in the video feed grid. Reference the generated placeholder image at frontend/public/assets/generated/video-placeholder.dim_400x600.png for videos without custom thumbnails."
+        },
+        {
+          "path": "frontend/src/components/NavigationBar.tsx",
+          "operation": "create",
+          "description": "Create a navigation bar component with links to video feed and profile pages. Include the login button component and display the app logo using the generated image at frontend/public/assets/generated/app-logo.dim_300x100.png. Add conditional navigation link to upload page that only appears when user is authenticated as admin owner."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add routes for VideoFeedPage at root path /, VideoPlayerPage at /video/:id, ProfilePage at /profile, and UploadVideoPage at /upload. Wrap upload route with authentication guard to ensure only admin users can access. Wire NavigationBar component into the app layout so it appears on all pages."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Design and implement a cohesive visual theme with bold, vibrant colors (avoiding blue and purple), modern typography, and smooth animations that create an engaging social media aesthetic throughout the application",
+      "acceptanceCriteria": [
+        "Consistent color palette applied across all pages",
+        "Typography hierarchy supports readability and brand identity",
+        "Smooth transitions and animations enhance user experience",
+        "Visual style feels modern and social-media-oriented"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Define global CSS variables for the color palette using bold, vibrant colors excluding blue and purple (use reds, oranges, yellows, greens, pinks). Set up typography styles with modern font hierarchy. Add smooth transition utilities for animations."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Extend Tailwind theme with custom color palette matching the design requirements. Configure typography plugin with modern font families. Add animation utilities for smooth transitions and hover effects."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "create",
+          "description": "Create a layout wrapper component applying consistent spacing, background colors, and animation classes to all pages. Use this layout to ensure visual consistency across the application."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wrap all routes with the Layout component to apply consistent styling throughout the application."
+        }
+      ]
+    }
+  ]
+}

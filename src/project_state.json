@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "A video-sharing app where only the owner can upload videos for fans to watch, featuring a TikTok-style profile interface",
+  "architectural_notes": [
+    "Owner-only upload access control required",
+    "Video storage and streaming capabilities needed",
+    "TikTok-inspired UI/UX for profile and video display"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Creator profile picture placeholder with modern gradient design (profile-avatar.dim_200x200.png)\n- App logo with bold, energetic styling suitable for video platform branding (app-logo.dim_300x100.png)\n- Video thumbnail placeholder for empty states (video-placeholder.dim_400x600.png)",
+  "existing_features": [
+    {
+      "id": "feature-implement-owner-authentication-using-internet-identity-to-restrict-video-uploads-to-a-single-authorized-user",
+      "title": "Implement owner authentication using Internet Identity to restrict video uploads to a single authorized user",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-tiktok-style-profile-page-displaying-the-creator-s-profile-information-including-profile-picture-username-bio-and-video-count-statistics",
+      "title": "Build a TikTok-style profile page displaying the creator's profile information including profile picture, username, bio, and video count statistics",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-video-feed-interface-where-fans-can-browse-and-watch-uploaded-videos-in-a-scrollable-grid-or-vertical-feed-layout",
+      "title": "Create a video feed interface where fans can browse and watch uploaded videos in a scrollable grid or vertical feed layout",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-design-and-implement-a-cohesive-visual-theme-with-bold-vibrant-colors-avoiding-blue-and-purple-modern-typography-and-smooth-animations-that-create-an-engaging-social-media-aesthetic-throughout-the-application",
+      "title": "Design and implement a cohesive visual theme with bold, vibrant colors (avoiding blue and purple), modern typography, and smooth animations that create an engaging social media aesthetic throughout the application",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "User authentication system for owner login",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Video upload functionality restricted to owner account",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "TikTok-style profile page display",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Video feed/gallery for fans to browse and watch uploaded videos",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Create video upload functionality that accepts video files, stores them in stable memory, and associates them with metadata (title, description, upload timestamp)",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Creator Studio",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

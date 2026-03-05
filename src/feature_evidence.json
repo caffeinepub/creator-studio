@@ -1,0 +1,96 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-implement-owner-authentication-using-internet-identity-to-restrict-video-uploads-to-a-single-authorized-user",
+      "featureTitle": "Implement owner authentication using Internet Identity to restrict video uploads to a single authorized user",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/LoginButton.tsx",
+        "frontend/src/components/ProfileSetupModal.tsx",
+        "frontend/src/components/UploadSuccessModal.tsx",
+        "frontend/src/pages/UploadVideoPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-tiktok-style-profile-page-displaying-the-creator-s-profile-information-including-profile-picture-username-bio-and-video-count-statistics",
+      "featureTitle": "Build a TikTok-style profile page displaying the creator's profile information including profile picture, username, bio, and video count statistics",
+      "files": [
+        "frontend/src/pages/ProfilePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-video-feed-interface-where-fans-can-browse-and-watch-uploaded-videos-in-a-scrollable-grid-or-vertical-feed-layout",
+      "featureTitle": "Create a video feed interface where fans can browse and watch uploaded videos in a scrollable grid or vertical feed layout",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/NavigationBar.tsx",
+        "frontend/src/components/VideoCard.tsx",
+        "frontend/src/pages/VideoFeedPage.tsx",
+        "frontend/src/pages/VideoPlayerPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-design-and-implement-a-cohesive-visual-theme-with-bold-vibrant-colors-avoiding-blue-and-purple-modern-typography-and-smooth-animations-that-create-an-engaging-social-media-aesthetic-throughout-the-application",
+      "featureTitle": "Design and implement a cohesive visual theme with bold, vibrant colors (avoiding blue and purple), modern typography, and smooth animations that create an engaging social media aesthetic throughout the application",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

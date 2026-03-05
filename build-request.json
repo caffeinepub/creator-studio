@@ -1,0 +1,56 @@
+{
+  "kind": "build_request",
+  "title": "Fix video not loading/displaying on the video player page",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Investigate and fix the issue where videos fail to load and display on the VideoPlayerPage. Ensure the video element is correctly sourced from the backend, the video URL or blob is properly constructed and passed to the HTML video element, and the player renders and plays the video without errors.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "my video is has not loaded in. I ant see it"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A video uploaded to the platform is visible and playable on the VideoPlayerPage.",
+        "The video element renders without a blank/black screen when navigating to a video's detail page.",
+        "No console errors related to video src, CORS, or missing blob/URL appear when loading a video.",
+        "The video loads within a reasonable time after the page renders."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Ensure the video feed (VideoFeedPage) correctly displays video thumbnails or fallback placeholders for all uploaded videos, so users can identify and navigate to their content.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "my video is has not loaded in. I ant see it"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each VideoCard on the feed shows either a thumbnail image or a styled fallback placeholder.",
+        "Clicking a VideoCard navigates to the correct VideoPlayerPage for that video."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "All Motoko logic must remain in the single main actor at backend/main.mo."
+  ],
+  "nonGoals": [
+    "Adding new video upload features or changing the upload flow.",
+    "Changing authentication or identity handling.",
+    "Redesigning the visual theme or layout."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
