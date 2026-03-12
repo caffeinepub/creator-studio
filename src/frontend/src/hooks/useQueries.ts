@@ -221,3 +221,23 @@ export function useUnfollowCreator() {
     },
   });
 }
+
+export function useAdminPrincipal() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Principal | null>({
+    queryKey: ["adminPrincipal"],
+    queryFn: async () => {
+      if (!actor) return null;
+      try {
+        // getAdminPrincipal exists in backend but may not be in type definitions
+        const result = await (actor as any).getAdminPrincipal();
+        return result ?? null;
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 5 * 60 * 1000, // cache for 5 minutes
+  });
+}

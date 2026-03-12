@@ -46,21 +46,21 @@ export default function AppFooter() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a
               data-ocid="footer.tiktok_link"
-              href="https://tiktok.com/@floridadave"
+              href="https://tiktok.com/@floridadave39"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors font-body text-sm"
             >
               <SiTiktok size={16} />
-              <span>@floridadave</span>
+              <span>@floridadave39</span>
             </a>
 
             <a
               data-ocid="footer.website_link"
-              href="https://floridadave.net"
+              href="https://floridadave-9sp.caffeine.xyz/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors font-body text-sm"
+              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors font-body text-sm py-2 px-1 min-h-[44px]"
             >
               <Globe size={16} />
               <span>FloridaDave.net</span>

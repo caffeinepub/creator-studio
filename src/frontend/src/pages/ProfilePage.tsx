@@ -5,7 +5,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Principal } from "@dfinity/principal";
 import {
   Heart,
   Loader2,
@@ -14,9 +13,9 @@ import {
   Users,
   Video,
 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import {
+  useAdminPrincipal,
   useFollowCreator,
   useFollowerCount,
   useGetCallerUserProfile,
@@ -25,9 +24,6 @@ import {
   useListVideos,
   useUnfollowCreator,
 } from "../hooks/useQueries";
-
-// localStorage key for persisting the creator's principal
-const CREATOR_PRINCIPAL_KEY = "floridadave_creator_principal";
 
 const PLACEHOLDER = "/assets/generated/video-placeholder.dim_400x600.png";
 
@@ -53,38 +49,23 @@ export default function ProfilePage() {
   const { data: isAdmin } = useIsAdmin();
 
   const isAuthenticated = !!identity;
-  const callerPrincipal = identity?.getPrincipal();
 
-  // ── Creator principal management ──────────────────────────────────────────
-  // When the creator (admin) visits their profile, store their principal so
-  // fans can use it to follow them.
-  const [creatorPrincipal, setCreatorPrincipal] = useState<Principal | null>(
-    () => {
-      try {
-        const stored = localStorage.getItem(CREATOR_PRINCIPAL_KEY);
-        return stored ? Principal.fromText(stored) : null;
-      } catch {
-        return null;
-      }
-    },
-  );
-
-  useEffect(() => {
-    if (isAdmin && callerPrincipal) {
-      const principalText = callerPrincipal.toString();
-      localStorage.setItem(CREATOR_PRINCIPAL_KEY, principalText);
-      setCreatorPrincipal(callerPrincipal);
-    }
-  }, [isAdmin, callerPrincipal]);
+  // ── Creator principal from backend ────────────────────────────────────────
+  // Fetches the admin's principal directly from the canister so any fan
+  // can follow without needing the creator to visit first.
+  const { data: creatorPrincipal } = useAdminPrincipal();
 
   // ── Determine if the current viewer is the creator ────────────────────────
   const isCreator = isAdmin === true;
 
   // ── Follow data ───────────────────────────────────────────────────────────
+  const resolvedCreatorPrincipal = creatorPrincipal ?? null;
   const { data: followerCount, isLoading: followerCountLoading } =
-    useFollowerCount(creatorPrincipal);
+    useFollowerCount(resolvedCreatorPrincipal);
   const { data: isFollowingCreator, isLoading: isFollowingLoading } =
-    useIsFollowing(!isCreator && isAuthenticated ? creatorPrincipal : null);
+    useIsFollowing(
+      !isCreator && isAuthenticated ? resolvedCreatorPrincipal : null,
+    );
 
   const followMutation = useFollowCreator();
   const unfollowMutation = useUnfollowCreator();
@@ -92,11 +73,11 @@ export default function ProfilePage() {
   const isMutating = followMutation.isPending || unfollowMutation.isPending;
 
   const handleFollowToggle = () => {
-    if (!creatorPrincipal) return;
+    if (!resolvedCreatorPrincipal) return;
     if (isFollowingCreator) {
-      unfollowMutation.mutate(creatorPrincipal);
+      unfollowMutation.mutate(resolvedCreatorPrincipal);
     } else {
-      followMutation.mutate(creatorPrincipal);
+      followMutation.mutate(resolvedCreatorPrincipal);
     }
   };
 
@@ -161,7 +142,7 @@ export default function ProfilePage() {
                         <p>Log in to follow</p>
                       </TooltipContent>
                     </Tooltip>
-                  ) : !creatorPrincipal ? (
+                  ) : !resolvedCreatorPrincipal ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>

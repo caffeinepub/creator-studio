@@ -146,13 +146,19 @@ export default function WheelOfChaos() {
       if (t < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       } else {
-        // Determine winner: pointer at top (angle = 0 = 12 o'clock position)
-        // Final rotation normalized
+        // Determine winner: pointer is fixed at top (12 o'clock).
+        // Segment 0 starts at -90deg (top) in drawWheel.
+        // We need the angle on the wheel that ends up at the top after rotation.
+        // The pointer points at angle (360 - finalDeg) on the original wheel.
+        // Segment i occupies [(i * segDeg - 90), (i+1) * segDeg - 90) degrees.
+        // Normalize pointer angle relative to the top-start offset.
         const finalDeg = ((currentRot % 360) + 360) % 360;
-        // Pointer at top = 270deg offset from start
-        const normalizedAngle = (360 - finalDeg + 270) % 360;
-        const winIndex =
-          Math.floor(normalizedAngle / (360 / NUM_SEGMENTS)) % NUM_SEGMENTS;
+        const segDeg = 360 / NUM_SEGMENTS;
+        // Which original wheel angle is under the pointer (top = 0 after rotation)
+        const pointerAngle = (360 - finalDeg + 360) % 360;
+        // Add 90 because segments start drawn from -90 (top)
+        const normalizedAngle = (pointerAngle + 90) % 360;
+        const winIndex = Math.floor(normalizedAngle / segDeg) % NUM_SEGMENTS;
         setResult(SEGMENTS[winIndex]);
         setSpinning(false);
       }
