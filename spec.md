@@ -1,25 +1,26 @@
 # Florida Dave Video Requests
 
 ## Current State
-The app has a fully styled booking modal with a form (name, recipient, message, email, optional file upload) and a placeholder "Pay with PayPal / Stripe" button that does nothing. Payment is not connected to any real provider.
+The app has multiple pages: VideoFeedPage, ProfilePage, OwloadVideoPage, OwnerDashboardPage, VideoPlayerPage, FishingGamePage. Navigation is handled by NavigationBar with links to Videos, Profile, Pier Fishing, Upload, and Dashboard.
 
 ## Requested Changes (Diff)
 
 ### Add
-- When the user clicks the pay button inside the booking modal, open a real PayPal payment link using Florida Dave's PayPal email (davidmcfddn77@gmail.com) with the correct amount pre-filled for the selected video option.
-- After clicking Pay with PayPal, show a note instructing the fan to include their name/request in the PayPal note field.
+- New page `/pier-gear` — Florida Dave Pier Gear merch page with Florida fishing pier aesthetic, dark blue ocean tones
+- Nav link "Pier Gear" in NavigationBar pointing to `/pier-gear`
+- Hero section with title "Florida Dave Pier Gear", subtitle "Official Fishing Gear from the Florida Dave Network", and description text
+- 4 product cards: Florida Dave Network Shirt (Pre-Order), Florida Dave Sun Protection Fishing Hat (Pre-Order), Florida Dave Fishing Bag (Pre-Order), Florida Dave Solar Fish Cooker (Coming Soon)
+- Each card: product name, description, image placeholder area, CTA button (Coming Soon or Pre-Order)
+- Bottom banner: "More Florida Dave gear coming soon."
 
 ### Modify
-- Replace the placeholder pay button with a live PayPal.Me-style link that opens PayPal in a new tab with the correct amount pre-filled using `https://www.paypal.com/paypalme/[username]/[amount]` or `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=[email]&amount=[amount]&currency_code=USD` format.
-- Update success message to remind fans to check email AND that payment was sent via PayPal.
+- App.tsx: add `/pier-gear` route pointing to new PierGearPage
+- NavigationBar.tsx: add Pier Gear nav link
 
 ### Remove
-- The "Secure payment coming soon" placeholder text — replace with real PayPal link behavior.
+- Nothing
 
 ## Implementation Plan
-1. In BookingModal.tsx, wire the Pay with PayPal button to open a PayPal payment URL using `https://www.paypal.com/paypalme/fortnitebuster/{price}` (Florida Dave's PayPal.Me handle derived from the Cameo handle, or use direct email link).
-   - Use PayPal direct payment link: `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=davidmcfddn77%40gmail.com&amount={price}&currency_code=USD&item_name={videoTitle}`
-   - Open in new tab on click.
-2. Add a small helper note below the button: "Include your name and request in the PayPal note."
-3. Update the form submit to also mark payment as initiated.
-4. Keep all existing form validation intact.
+1. Create `src/frontend/src/pages/PierGearPage.tsx` with hero, product cards grid, and bottom banner
+2. Update `src/frontend/src/App.tsx` to add the route
+3. Update `src/frontend/src/components/NavigationBar.tsx` to add nav link

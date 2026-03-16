@@ -82,11 +82,11 @@ export default function HeroSection() {
           className="flex justify-center mb-6"
         >
           <div className="relative">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white/80 shadow-2xl overflow-hidden">
+            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white/80 shadow-2xl overflow-hidden bg-white">
               <img
-                src="/assets/generated/florida-dave-hero.dim_400x400.jpg"
+                src="/assets/uploads/Florida-Dave-Network-logo-1-1.png"
                 alt="Florida Dave"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain p-1"
               />
             </div>
             {/* Online badge */}

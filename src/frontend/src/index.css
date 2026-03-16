@@ -149,3 +149,125 @@
     @apply text-white rounded-full px-3 py-1 text-sm font-bold;
   }
 }
+
+/* ===================== */
+/* Pier Gear Page Styles */
+/* ===================== */
+
+.pier-gear-bg {
+  background: oklch(0.12 0.04 230);
+}
+
+.pier-hero-section {
+  background: linear-gradient(
+    160deg,
+    oklch(0.18 0.08 240) 0%,
+    oklch(0.14 0.06 230) 40%,
+    oklch(0.1 0.04 220) 100%
+  );
+  min-height: 380px;
+}
+
+.pier-hero-overlay {
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    oklch(0.45 0.18 240 / 0.3) 0%,
+    transparent 70%
+  );
+}
+
+.pier-gold-text {
+  color: oklch(0.82 0.18 80);
+}
+
+.pier-badge {
+  background: oklch(0.82 0.18 80);
+  color: oklch(0.15 0.04 50);
+  border: none;
+}
+
+.pier-products-section {
+  background: oklch(0.12 0.04 230);
+}
+
+.pier-product-card {
+  background: oklch(0.16 0.05 235);
+  border: 1px solid oklch(0.25 0.06 235);
+  border-radius: 1rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s
+    ease;
+}
+
+.pier-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px oklch(0.08 0.04 230 / 0.8);
+  border-color: oklch(0.82 0.18 80 / 0.4);
+}
+
+.pier-product-image-area {
+  background: linear-gradient(
+    135deg,
+    oklch(0.2 0.07 240) 0%,
+    oklch(0.15 0.05 225) 100%
+  );
+  border-bottom: 1px solid oklch(0.25 0.06 235);
+  min-height: 180px;
+}
+
+.pier-product-icon-circle {
+  background: oklch(0.82 0.18 80 / 0.15);
+  border: 2px solid oklch(0.82 0.18 80 / 0.3);
+  border-radius: 50%;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pier-gold-icon {
+  color: oklch(0.82 0.18 80);
+}
+
+.pier-preorder-badge {
+  background: oklch(0.45 0.18 155);
+  color: white;
+  border: none;
+}
+
+.pier-soon-badge {
+  background: oklch(0.55 0.14 50);
+  color: white;
+  border: none;
+}
+
+.pier-muted-text {
+  color: oklch(0.65 0.06 235);
+}
+
+.pier-preorder-btn {
+  background: oklch(0.82 0.18 80);
+  color: oklch(0.15 0.04 50);
+  border: none;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.pier-preorder-btn:hover {
+  background: oklch(0.75 0.2 78);
+  transform: scale(1.02);
+}
+
+.pier-soon-btn {
+  background: transparent;
+  color: oklch(0.55 0.06 235);
+  border: 1px solid oklch(0.3 0.06 235);
+  opacity: 0.7;
+}
+
+.pier-banner {
+  background: linear-gradient(
+    135deg,
+    oklch(0.16 0.07 240) 0%,
+    oklch(0.12 0.05 230) 100%
+  );
+  border-top: 1px solid oklch(0.82 0.18 80 / 0.2);
+}

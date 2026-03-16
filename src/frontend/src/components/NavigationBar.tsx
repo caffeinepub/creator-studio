@@ -1,5 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { BarChart2, Upload, User, Video } from "lucide-react";
+import {
+  BarChart2,
+  Fish,
+  ShoppingBag,
+  Upload,
+  User,
+  Video,
+} from "lucide-react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { useIsAdmin } from "../hooks/useQueries";
 import LoginButton from "./LoginButton";
@@ -39,6 +46,24 @@ export default function NavigationBar() {
           >
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profile</span>
+          </Link>
+
+          <Link
+            to="/fishing"
+            data-ocid="nav.fishing.link"
+            className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+          >
+            <Fish className="h-4 w-4" />
+            <span className="hidden sm:inline">Pier Fishing</span>
+          </Link>
+
+          <Link
+            to="/pier-gear"
+            data-ocid="nav.pier_gear.link"
+            className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            <span className="hidden sm:inline">Pier Gear</span>
           </Link>
 
           {isAuthenticated && (

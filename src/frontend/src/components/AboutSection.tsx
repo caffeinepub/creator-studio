@@ -10,11 +10,13 @@ export default function AboutSection() {
           {/* Avatar */}
           <div className="flex-shrink-0">
             <div className="relative">
-              <img
-                src="/assets/Florida Dave Network logo.png"
-                alt="Florida Dave"
-                className="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-primary/30 shadow-glow"
-              />
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-primary/30 shadow-glow overflow-hidden bg-white">
+                <img
+                  src="/assets/uploads/Florida-Dave-Network-logo-1-1.png"
+                  alt="Florida Dave"
+                  className="w-full h-full object-contain p-1"
+                />
+              </div>
               <span className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background" />
             </div>
           </div>
