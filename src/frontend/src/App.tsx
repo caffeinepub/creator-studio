@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import Layout from "./components/Layout";
 import FishingGamePage from "./pages/FishingGamePage";
+import LeaderboardPage from "./pages/LeaderboardPage";
 import OwnerDashboardPage from "./pages/OwnerDashboardPage";
 import PierGearPage from "./pages/PierGearPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -65,6 +66,12 @@ const pierGearRoute = createRoute({
   component: PierGearPage,
 });
 
+const leaderboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/leaderboard",
+  component: LeaderboardPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   profileRoute,
@@ -73,6 +80,7 @@ const routeTree = rootRoute.addChildren([
   videoRoute,
   fishingRoute,
   pierGearRoute,
+  leaderboardRoute,
 ]);
 
 const router = createRouter({ routeTree });
