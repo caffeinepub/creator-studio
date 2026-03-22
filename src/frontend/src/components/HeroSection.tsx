@@ -137,6 +137,30 @@ export default function HeroSection() {
             </div>
           ))}
         </motion.div>
+
+        {/* Play the Game button */}
+        <motion.div
+          initial={{ y: 16, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.55, duration: 0.5 }}
+          className="mt-8"
+        >
+          <a
+            href="https://floridadave-9sp.caffeine.xyz/fishing"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-ocid="hero.play_game.button"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-extrabold text-lg md:text-xl shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl active:scale-95"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.82 0.18 85) 0%, oklch(0.75 0.2 65) 100%)",
+              color: "oklch(0.2 0.05 245)",
+              textShadow: "none",
+            }}
+          >
+            🎣 Play the Fishing Game
+          </a>
+        </motion.div>
       </div>
     </section>
   );

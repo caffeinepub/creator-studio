@@ -163,6 +163,7 @@ const UNLOCK_MILESTONES = [
 interface CatchEntry {
   id: number;
   catch: Catch;
+  boosted?: boolean;
 }
 
 const PARTICLES = [
@@ -274,6 +275,20 @@ export default function FishingGamePage() {
   const [showHighScorePopup, setShowHighScorePopup] = useState(false);
   const [playerNameInput, setPlayerNameInput] = useState(() => getRandomName());
   const [submittedToLeaderboard, setSubmittedToLeaderboard] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  // Ad system state
+  const [krakenShields, setKrakenShields] = useState(0);
+  const [hasBonusCatch, setHasBonusCatch] = useState(false);
+  const [lastLostPoints, setLastLostPoints] = useState(0);
+  const [showKrakenRecovery, setShowKrakenRecovery] = useState(false);
+  const [adWatching, setAdWatching] = useState(false);
+  const [adCountdown, setAdCountdown] = useState(5);
+  const [_pendingAdType, setPendingAdType] = useState<
+    "recovery" | "shield" | "bonus" | null
+  >(null);
+  const [adToast, setAdToast] = useState<string | null>(null);
+  const adCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -283,6 +298,7 @@ export default function FishingGamePage() {
   const clearTimers = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (countdownRef.current) clearInterval(countdownRef.current);
+    if (adCountdownRef.current) clearInterval(adCountdownRef.current);
   }, []);
 
   useEffect(() => {
@@ -320,10 +336,62 @@ export default function FishingGamePage() {
     });
   }, [bankedPoints, unlockedMilestones]);
 
-  function addCatchToLog(caught: Catch) {
+  function showAdToast(msg: string) {
+    setAdToast(msg);
+    setTimeout(() => setAdToast(null), 3000);
+  }
+
+  function grantAdReward(type: "recovery" | "shield" | "bonus") {
+    if (type === "recovery") {
+      setScore(lastLostPoints);
+      setShowKrakenRecovery(false);
+      // Resume game
+      setCatchesSinceKraken(0);
+      setKrakenTriggerAt(getNextKrakenTrigger());
+      setKrakenPhase("none");
+      setKrakenOutcome(null);
+      showAdToast("Your catch was recovered!");
+    } else if (type === "shield") {
+      setKrakenShields((prev) => {
+        const next = Math.min(prev + 1, 3);
+        showAdToast(`🛡️ Kraken Shield added! (${next}/3)`);
+        return next;
+      });
+    } else if (type === "bonus") {
+      setHasBonusCatch(true);
+      showAdToast("⚡ Bonus 2x Catch active!");
+    }
+  }
+
+  function watchAd(type: "recovery" | "shield" | "bonus") {
+    setShowKrakenRecovery(false);
+    setPendingAdType(type);
+    setAdCountdown(5);
+    setAdWatching(true);
+    let count = 5;
+    adCountdownRef.current = setInterval(() => {
+      count -= 1;
+      setAdCountdown(count);
+      if (count <= 0) {
+        if (adCountdownRef.current) clearInterval(adCountdownRef.current);
+        setAdWatching(false);
+        setPendingAdType(null);
+        grantAdReward(type);
+      }
+    }, 1000);
+  }
+
+  function handleAdSkip() {
+    if (adCountdownRef.current) clearInterval(adCountdownRef.current);
+    setAdWatching(false);
+    setPendingAdType(null);
+    showAdToast("Ad not completed. No reward given.");
+  }
+
+  function addCatchToLog(caught: Catch, boosted = false) {
     catchIdRef.current += 1;
     setCatchLog((log) => [
-      { id: catchIdRef.current, catch: caught },
+      { id: catchIdRef.current, catch: caught, boosted },
       ...log.slice(0, 4),
     ]);
   }
@@ -365,16 +433,32 @@ export default function FishingGamePage() {
       setShowLegendaryPopup(true);
       timerRef.current = setTimeout(() => {
         setShowLegendaryPopup(false);
-        setScore((s) => s + caught.points);
-        addCatchToLog(caught);
+        let pts = caught.points;
+        let boosted = false;
+        if (hasBonusCatch) {
+          pts = pts * 2;
+          setHasBonusCatch(false);
+          boosted = true;
+          showAdToast("⚡ 2x Catch Boost applied!");
+        }
+        setScore((s) => s + pts);
+        addCatchToLog(caught, boosted);
         setLastCatch(caught);
         setGameState("reeled");
         finishReelCycle(caught);
       }, 3000);
     } else {
+      let pts = caught.points;
+      let boosted = false;
+      if (hasBonusCatch) {
+        pts = pts * 2;
+        setHasBonusCatch(false);
+        boosted = true;
+        showAdToast("⚡ 2x Catch Boost applied!");
+      }
       setLastCatch(caught);
-      setScore((s) => s + caught.points);
-      addCatchToLog(caught);
+      setScore((s) => s + pts);
+      addCatchToLog(caught, boosted);
       setGameState("reeled");
       finishReelCycle(caught);
     }
@@ -411,21 +495,47 @@ export default function FishingGamePage() {
   function handleRiskIt() {
     const win = Math.random() < 0.5;
     const multiplier = win ? (Math.random() < 0.5 ? 2 : 3) : 0;
+
+    if (!win && krakenShields > 0) {
+      // Shield absorbs the loss
+      setKrakenShields((prev) => prev - 1);
+      setCatchesSinceKraken(0);
+      setKrakenTriggerAt(getNextKrakenTrigger());
+      setKrakenPhase("none");
+      setKrakenOutcome(null);
+      showAdToast("🛡️ Shield saved you!");
+      return;
+    }
+
     setKrakenOutcome(win ? "win" : "lose");
     setKrakenPhase("outcome");
 
     if (win) {
       setScore((s) => s * multiplier);
     } else {
-      setScore(0);
+      // Save lost points then zero out
+      setScore((s) => {
+        setLastLostPoints(s);
+        return 0;
+      });
     }
 
-    timerRef.current = setTimeout(() => {
-      setCatchesSinceKraken(0);
-      setKrakenTriggerAt(getNextKrakenTrigger());
-      setKrakenPhase("none");
-      setKrakenOutcome(null);
-    }, 3500);
+    if (win) {
+      timerRef.current = setTimeout(() => {
+        setCatchesSinceKraken(0);
+        setKrakenTriggerAt(getNextKrakenTrigger());
+        setKrakenPhase("none");
+        setKrakenOutcome(null);
+      }, 3500);
+    } else {
+      timerRef.current = setTimeout(() => {
+        setCatchesSinceKraken(0);
+        setKrakenTriggerAt(getNextKrakenTrigger());
+        setKrakenPhase("none");
+        setKrakenOutcome(null);
+        setShowKrakenRecovery(true);
+      }, 2500);
+    }
   }
 
   function handleSubmitScore() {
@@ -437,6 +547,41 @@ export default function FishingGamePage() {
 
   function handleSkipHighScore() {
     setShowHighScorePopup(false);
+  }
+
+  function handleResetGame() {
+    // Clear timer refs
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (adCountdownRef.current) clearInterval(adCountdownRef.current);
+    // Reset all current-run state — DO NOT touch localStorage leaderboard
+    setGameState("idle");
+    setScore(0);
+    setBankedPoints(0);
+    setLastCatch(null);
+    setCatchLog([]);
+    setReelCountdown(3);
+    setBobberLeft(50);
+    setShowCastLine(false);
+    setShowLegendaryPopup(false);
+    setKrakenPhase("none");
+    setKrakenOutcome(null);
+    setCatchesSinceKraken(0);
+    setKrakenTriggerAt(Math.floor(Math.random() * 11) + 5);
+    setUnlockedMilestones([]);
+    setNewUnlock(null);
+    setPeakBanked(0);
+    setShowHighScorePopup(false);
+    setSubmittedToLeaderboard(false);
+    setShowResetConfirm(false);
+    // Ad system resets
+    setKrakenShields(0);
+    setHasBonusCatch(false);
+    setLastLostPoints(0);
+    setShowKrakenRecovery(false);
+    setAdWatching(false);
+    setPendingAdType(null);
+    setAdToast(null);
   }
 
   const reelProgress = (reelCountdown / 3) * 100;
@@ -469,6 +614,14 @@ export default function FishingGamePage() {
               <span className="score-label">🏦 Banked</span>
               <span className="score-value">{bankedPoints}</span>
             </div>
+            {krakenShields > 0 && (
+              <div
+                className="shield-display"
+                data-ocid="fishing.shield_display"
+              >
+                🛡️ {krakenShields}/3
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -568,6 +721,52 @@ export default function FishingGamePage() {
             >
               🏆 View Leaderboard
             </button>
+
+            {/* Bonus Catch Ad */}
+            <div className="ad-btn-wrapper">
+              <button
+                type="button"
+                className="ad-reward-btn"
+                onClick={() => watchAd("bonus")}
+                disabled={hasBonusCatch}
+                data-ocid="fishing.bonus_catch_button"
+              >
+                <span className="ad-badge">AD</span>⚡ Bonus Catch Boost
+              </button>
+              <div className="ad-btn-sub">
+                {hasBonusCatch
+                  ? "Boost Active! 🟢"
+                  : "Watch ad to double your next catch"}
+              </div>
+            </div>
+
+            {/* Shield Ad */}
+            <div className="ad-btn-wrapper">
+              <button
+                type="button"
+                className="ad-reward-btn"
+                onClick={() => watchAd("shield")}
+                disabled={krakenShields >= 3}
+                data-ocid="fishing.get_shield_button"
+              >
+                <span className="ad-badge">AD</span>
+                🛡️ Get Kraken Shield
+              </button>
+              <div className="ad-btn-sub">
+                {krakenShields >= 3
+                  ? "Max shields reached (3/3)"
+                  : `Watch ad for 1 shield (${krakenShields}/3)`}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="reset-game-btn"
+              onClick={() => setShowResetConfirm(true)}
+              data-ocid="fishing.reset_game_button"
+            >
+              🔄 Reset Game
+            </button>
           </>
         )}
         {gameState === "casting" && (
@@ -635,16 +834,17 @@ export default function FishingGamePage() {
             {catchLog.map((entry, idx) => (
               <li
                 key={entry.id}
-                className={`log-item${entry.catch.rarity === "godlike" ? " log-item-golden" : ""}`}
+                className={`log-item${entry.catch.rarity === "godlike" ? " log-item-golden" : ""}${entry.boosted ? " log-item-boosted" : ""}`}
                 data-ocid={`fishing.catch_log.item.${idx + 1}`}
               >
                 <span className="log-emoji">{entry.catch.emoji}</span>
                 <span className="log-name">{entry.catch.name}</span>
+                {entry.boosted && <span className="log-boost-badge">⚡2x</span>}
                 <span
                   className="log-pts"
                   style={{ color: RARITY_COLOR[entry.catch.rarity] }}
                 >
-                  +{entry.catch.points}
+                  +{entry.boosted ? entry.catch.points * 2 : entry.catch.points}
                 </span>
               </li>
             ))}
@@ -728,6 +928,12 @@ export default function FishingGamePage() {
             <div className="kraken-sub">
               Lock in your points or risk it all?
             </div>
+            {krakenShields > 0 && (
+              <div className="kraken-shield-notice">
+                🛡️ You have {krakenShields} shield{krakenShields > 1 ? "s" : ""}{" "}
+                — Risk It will auto-use one!
+              </div>
+            )}
             <div className="kraken-pts-row">
               <span className="kraken-pts-label">Current Points:</span>
               <span className="kraken-pts-value">{score}</span>
@@ -780,6 +986,74 @@ export default function FishingGamePage() {
         </div>
       )}
 
+      {/* === KRAKEN RECOVERY POPUP === */}
+      {showKrakenRecovery && !adWatching && (
+        <div
+          className="overlay kraken-recovery-overlay"
+          data-ocid="fishing.recovery_modal"
+        >
+          <div className="recovery-popup">
+            <div style={{ fontSize: "3rem" }}>🐙</div>
+            <div className="recovery-title">
+              The Kraken has taken everything!
+            </div>
+            <div className="recovery-msg">
+              Watch an ad to recover your lost points?
+            </div>
+            <div className="recovery-pts">{lastLostPoints} pts at risk</div>
+            <div className="recovery-buttons">
+              <button
+                type="button"
+                className="recovery-btn recovery-no-btn"
+                onClick={() => setShowKrakenRecovery(false)}
+                data-ocid="fishing.recovery_cancel_button"
+              >
+                No Thanks
+              </button>
+              <button
+                type="button"
+                className="recovery-btn recovery-yes-btn"
+                onClick={() => watchAd("recovery")}
+                data-ocid="fishing.recovery_watch_button"
+              >
+                <span className="ad-badge">AD</span>
+                Watch Ad to Recover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* === AD WATCHING MODAL === */}
+      {adWatching && (
+        <div
+          className="overlay ad-watching-overlay"
+          data-ocid="fishing.ad_watching_modal"
+        >
+          <div className="ad-watching-popup">
+            <div className="ad-watching-label">📺 Rewarded Ad</div>
+            <div className="ad-watching-countdown">{adCountdown}s</div>
+            <div className="ad-countdown-bar">
+              <div
+                className="ad-countdown-fill"
+                style={{ width: `${((5 - adCountdown) / 5) * 100}%` }}
+              />
+            </div>
+            <div className="ad-watching-msg">
+              Watch the full ad to earn your reward
+            </div>
+            <button
+              type="button"
+              className="ad-skip-btn"
+              onClick={handleAdSkip}
+              data-ocid="fishing.ad_skip_button"
+            >
+              ✕ Skip (no reward)
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* === HIGH SCORE POPUP === */}
       {showHighScorePopup && (
         <div className="hs-overlay" data-ocid="fishing.highscore_modal">
@@ -828,10 +1102,50 @@ export default function FishingGamePage() {
         </div>
       )}
 
+      {/* === RESET CONFIRM MODAL === */}
+      {showResetConfirm && (
+        <div className="reset-overlay" data-ocid="fishing.reset_modal">
+          <div className="reset-popup">
+            <div className="reset-title">Reset Game?</div>
+            <div className="reset-msg">
+              Are you sure you want to reset your current progress?
+            </div>
+            <div className="reset-msg reset-msg-safe">
+              Your leaderboard scores will stay saved.
+            </div>
+            <div className="reset-buttons">
+              <button
+                type="button"
+                className="reset-btn reset-cancel-btn"
+                onClick={() => setShowResetConfirm(false)}
+                data-ocid="fishing.reset_cancel_button"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="reset-btn reset-confirm-btn"
+                onClick={handleResetGame}
+                data-ocid="fishing.reset_confirm_button"
+              >
+                Yes, Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* === UNLOCK TOAST === */}
       {newUnlock && (
         <div className="unlock-toast" data-ocid="fishing.unlock_toast">
           🏆 UNLOCKED: {newUnlock}
+        </div>
+      )}
+
+      {/* === AD TOAST === */}
+      {adToast && (
+        <div className="ad-toast" data-ocid="fishing.ad_toast">
+          {adToast}
         </div>
       )}
 
@@ -888,6 +1202,7 @@ export default function FishingGamePage() {
           display: flex;
           gap: 8px;
           flex-shrink: 0;
+          align-items: center;
         }
         .fishing-score {
           display: flex;
@@ -1030,10 +1345,12 @@ export default function FishingGamePage() {
         .log-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
         .log-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: rgba(0,119,182,0.06); border-radius: 10px; animation: itemFadeIn 0.3s ease-out; }
         .log-item-golden { background: linear-gradient(90deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1)); border: 1px solid rgba(255,215,0,0.4); box-shadow: 0 0 8px rgba(255,215,0,0.2); }
+        .log-item-boosted { background: linear-gradient(90deg, rgba(180,100,255,0.12), rgba(106,13,173,0.08)); border: 1px solid rgba(180,100,255,0.3); }
         @keyframes itemFadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         .log-emoji { font-size: 1.3rem; }
         .log-name { flex: 1; font-size: 0.9rem; font-weight: 600; color: #1a3a5c; }
         .log-pts { font-size: 0.85rem; font-weight: 800; }
+        .log-boost-badge { font-size: 0.65rem; font-weight: 900; background: linear-gradient(135deg, #4a0080, #6a0dad); color: white; border-radius: 6px; padding: 1px 5px; letter-spacing: 0.05em; }
         .unlocks-section { width: calc(100% - 40px); max-width: 440px; background: rgba(255,255,255,0.85); border-radius: 20px; padding: 14px 20px; margin: 0 20px 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1.5px solid rgba(255,215,0,0.3); }
         .unlocks-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
         .unlock-badge { background: linear-gradient(135deg, #fff8e1, #fff3cd); border: 1px solid rgba(255,215,0,0.5); border-radius: 10px; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; color: #7a5c00; }
@@ -1041,6 +1358,9 @@ export default function FishingGamePage() {
         .fishing-footer a { color: #0077b6; text-decoration: none; }
         .fishing-footer a:hover { text-decoration: underline; }
         @keyframes floatBob { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        .reset-game-btn { width: 100%; max-width: 320px; height: 40px; font-size: 0.82rem; font-weight: 700; font-family: 'Bricolage Grotesque', system-ui, sans-serif; background: transparent; color: #c62828; border: 1.5px solid rgba(198,40,40,0.35); border-radius: 12px; cursor: pointer; transition: background 0.15s, transform 0.15s; letter-spacing: 0.02em; margin-top: 4px; }
+        .reset-game-btn:hover { background: rgba(198,40,40,0.08); transform: translateY(-1px); }
+        .reset-game-btn:active { transform: scale(0.97); }
 
         /* === LEGENDARY OVERLAY === */
         .legendary-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; animation: overlayFadeIn 0.3s ease-out both; }
@@ -1078,6 +1398,7 @@ export default function FishingGamePage() {
         .kraken-title { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: clamp(1.3rem, 5vw, 1.8rem); font-weight: 900; color: #c77dff; text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.1; text-shadow: 0 0 20px rgba(123,47,255,0.8); animation: krakenGlow 1.2s ease-in-out infinite; }
         @keyframes krakenGlow { 0%, 100% { text-shadow: 0 0 20px rgba(123,47,255,0.8); } 50% { text-shadow: 0 0 40px rgba(180,100,255,1), 0 0 60px rgba(123,47,255,0.5); } }
         .kraken-sub { font-size: 0.95rem; font-weight: 600; color: #b39ddb; margin-top: 8px; margin-bottom: 16px; }
+        .kraken-shield-notice { background: rgba(26,35,126,0.3); border: 1px solid rgba(100,120,255,0.4); border-radius: 10px; padding: 7px 14px; font-size: 0.8rem; font-weight: 700; color: #90caf9; margin-bottom: 12px; }
         .kraken-pts-row { display: flex; justify-content: center; align-items: center; gap: 10px; background: rgba(123,47,255,0.15); border: 1px solid rgba(123,47,255,0.3); border-radius: 12px; padding: 10px 20px; margin-bottom: 18px; }
         .kraken-pts-label { font-size: 0.9rem; font-weight: 600; color: #ce93d8; }
         .kraken-pts-value { font-size: 1.8rem; font-weight: 900; color: #fff; text-shadow: 0 0 12px rgba(200,150,255,0.8); }
@@ -1099,30 +1420,84 @@ export default function FishingGamePage() {
         .outcome-sub { margin-top: 10px; font-size: 0.95rem; font-weight: 600; color: #ccc; }
 
         /* === HIGH SCORE POPUP === */
-        .hs-overlay { position: fixed; inset: 0; z-index: 9996; background: rgba(0,0,0,0.72); display: flex; align-items: center; justify-content: center; animation: overlayFadeIn 0.3s ease-out both; padding: 20px; }
-        .hs-popup { width: min(92vw, 380px); background: linear-gradient(135deg, #003a6e, #004f9a, #003a6e); border: 2.5px solid #ffd700; border-radius: 28px; padding: 32px 24px 28px; text-align: center; box-shadow: 0 0 60px rgba(255,215,0,0.4), 0 20px 60px rgba(0,0,0,0.5); animation: popupEntry 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
-        .hs-emoji { font-size: 3.5rem; margin-bottom: 8px; animation: ptsBounce 1s ease-in-out infinite; }
-        .hs-title { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: clamp(1.5rem, 6vw, 2rem); font-weight: 900; color: #ffd700; text-transform: uppercase; letter-spacing: 0.06em; text-shadow: 0 0 20px rgba(255,215,0,0.6); animation: titleGlow 1.2s ease-in-out infinite; }
-        .hs-sub { font-size: 0.95rem; font-weight: 600; color: #90caf9; margin-top: 8px; }
-        .hs-score-display { display: flex; flex-direction: column; align-items: center; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 12px 24px; margin: 16px 0; }
-        .hs-score-num { font-size: 2.5rem; font-weight: 900; color: #ffd700; line-height: 1; text-shadow: 0 0 16px rgba(255,215,0,0.7); }
-        .hs-score-label { font-size: 0.75rem; font-weight: 700; color: #90caf9; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-        .hs-name-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; text-align: left; }
-        .hs-name-label { font-size: 0.8rem; font-weight: 700; color: #90caf9; text-transform: uppercase; letter-spacing: 0.06em; }
-        .hs-name-input { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,215,0,0.35); border-radius: 12px; color: white; font-size: 1rem; font-weight: 600; font-family: inherit; outline: none; box-sizing: border-box; }
-        .hs-name-input::placeholder { color: rgba(255,255,255,0.4); }
-        .hs-name-input:focus { border-color: rgba(255,215,0,0.7); background: rgba(255,255,255,0.15); }
-        .hs-buttons { display: flex; gap: 10px; justify-content: center; }
-        .hs-btn { flex: 1; padding: 13px 12px; font-size: 0.95rem; font-weight: 800; border: none; border-radius: 14px; cursor: pointer; font-family: 'Bricolage Grotesque', system-ui, sans-serif; transition: transform 0.15s; letter-spacing: 0.03em; }
+        .hs-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; padding: 20px; animation: overlayFadeIn 0.3s ease-out both; }
+        .hs-popup { width: min(92vw, 380px); background: linear-gradient(160deg, #0a1628, #122040, #0a1628); border: 2.5px solid #ffd700; border-radius: 28px; padding: 32px 24px 28px; text-align: center; box-shadow: 0 0 60px rgba(255,215,0,0.4); animation: popupEntry 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .hs-emoji { font-size: 3rem; display: block; margin-bottom: 8px; }
+        .hs-title { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: clamp(1.4rem, 5vw, 1.8rem); font-weight: 900; color: #ffd700; text-transform: uppercase; letter-spacing: 0.06em; text-shadow: 0 0 20px rgba(255,215,0,0.8); }
+        .hs-sub { font-size: 0.9rem; font-weight: 600; color: #90a4ae; margin: 8px 0 16px; }
+        .hs-score-display { display: flex; flex-direction: column; align-items: center; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 14px; padding: 12px 24px; margin-bottom: 18px; }
+        .hs-score-num { font-size: 2.4rem; font-weight: 900; color: #ffd700; line-height: 1; }
+        .hs-score-label { font-size: 0.75rem; font-weight: 600; color: #90a4ae; text-transform: uppercase; letter-spacing: 0.1em; }
+        .hs-name-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+        .hs-name-label { font-size: 0.8rem; font-weight: 700; color: #90a4ae; text-align: left; }
+        .hs-name-input { width: 100%; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 14px; font-size: 0.95rem; font-weight: 600; color: white; font-family: inherit; outline: none; }
+        .hs-name-input:focus { border-color: rgba(255,215,0,0.5); background: rgba(255,255,255,0.12); }
+        .hs-buttons { display: flex; gap: 10px; }
+        .hs-btn { flex: 1; padding: 13px 12px; font-size: 0.9rem; font-weight: 800; border: none; border-radius: 14px; cursor: pointer; font-family: 'Bricolage Grotesque', system-ui, sans-serif; transition: transform 0.15s; letter-spacing: 0.02em; }
         .hs-btn:active { transform: scale(0.95); }
         .hs-submit-btn { background: linear-gradient(135deg, #b8860b, #ffd700); color: #1a0800; box-shadow: 0 4px 16px rgba(255,215,0,0.4); }
-        .hs-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.5); }
-        .hs-skip-btn { background: rgba(255,255,255,0.1); color: #90caf9; border: 1.5px solid rgba(255,255,255,0.2); }
-        .hs-skip-btn:hover { background: rgba(255,255,255,0.18); }
+        .hs-submit-btn:hover { transform: translateY(-2px); }
+        .hs-skip-btn { background: rgba(255,255,255,0.08); color: #90a4ae; border: 1px solid rgba(255,255,255,0.15); }
+        .hs-skip-btn:hover { background: rgba(255,255,255,0.14); }
+
+        /* === RESET MODAL === */
+        .reset-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; padding: 20px; animation: overlayFadeIn 0.25s ease-out both; }
+        .reset-popup { width: min(92vw, 360px); background: linear-gradient(160deg, #1a0505, #2a0a0a, #1a0505); border: 2px solid rgba(198,40,40,0.5); border-radius: 24px; padding: 28px 22px 24px; text-align: center; box-shadow: 0 0 40px rgba(198,40,40,0.3); animation: popupEntry 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .reset-title { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 1.4rem; font-weight: 900; color: #ef5350; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .reset-msg { font-size: 0.9rem; font-weight: 600; color: #b0bec5; margin-bottom: 6px; }
+        .reset-msg-safe { font-size: 0.8rem; color: #81c784; margin-bottom: 20px; }
+        .reset-buttons { display: flex; gap: 10px; justify-content: center; }
+        .reset-btn { flex: 1; max-width: 150px; padding: 13px 12px; font-size: 0.9rem; font-weight: 800; border: none; border-radius: 14px; cursor: pointer; font-family: 'Bricolage Grotesque', system-ui, sans-serif; transition: transform 0.15s; letter-spacing: 0.02em; }
+        .reset-btn:active { transform: scale(0.95); }
+        .reset-cancel-btn { background: rgba(255,255,255,0.08); color: #b0bec5; border: 1px solid rgba(255,255,255,0.15); }
+        .reset-cancel-btn:hover { background: rgba(255,255,255,0.14); }
+        .reset-confirm-btn { background: linear-gradient(135deg, #b71c1c, #c62828); color: white; box-shadow: 0 4px 14px rgba(183,28,28,0.5); }
+        .reset-confirm-btn:hover { transform: translateY(-2px); }
 
         /* === UNLOCK TOAST === */
-        .unlock-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #b8860b, #ffd700); color: #1a0800; font-size: 0.95rem; font-weight: 800; padding: 12px 24px; border-radius: 999px; box-shadow: 0 6px 24px rgba(255,215,0,0.5); z-index: 9997; animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; white-space: nowrap; }
-        @keyframes toastIn { from { transform: translateX(-50%) translateY(40px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        .unlock-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #b8860b, #ffd700); color: #1a0800; font-size: 0.9rem; font-weight: 800; padding: 12px 22px; border-radius: 999px; box-shadow: 0 6px 24px rgba(255,215,0,0.5); z-index: 9997; animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; white-space: nowrap; max-width: 90vw; text-align: center; }
+        @keyframes toastIn { from { transform: translateX(-50%) translateY(20px) scale(0.9); opacity: 0; } to { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; } }
+
+        /* === SHIELD DISPLAY === */
+        .shield-display { background: linear-gradient(135deg, #1a237e, #283593); color: white; border-radius: 14px; padding: 5px 12px; font-size: 0.9rem; font-weight: 800; box-shadow: 0 4px 12px rgba(26,35,126,0.4); }
+
+        /* === AD BUTTONS === */
+        .ad-btn-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .ad-reward-btn { position: relative; width: 100%; height: 44px; font-size: 0.9rem; font-weight: 800; font-family: 'Bricolage Grotesque', system-ui, sans-serif; background: linear-gradient(135deg, #4a0080, #6a0dad); color: white; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(106,13,173,0.4); transition: transform 0.15s, opacity 0.15s; letter-spacing: 0.02em; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; }
+        .ad-reward-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 7px 18px rgba(106,13,173,0.5); }
+        .ad-reward-btn:active:not(:disabled) { transform: scale(0.96); }
+        .ad-reward-btn:disabled { opacity: 0.5; cursor: default; }
+        .ad-badge { background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 1px 5px; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; flex-shrink: 0; }
+        .ad-btn-sub { font-size: 0.72rem; color: #6a0dad; font-weight: 600; text-align: center; }
+
+        /* === KRAKEN RECOVERY POPUP === */
+        .overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; animation: overlayFadeIn 0.3s ease-out both; }
+        .kraken-recovery-overlay { background: rgba(0,0,10,0.85); }
+        .recovery-popup { width: min(92vw, 380px); background: linear-gradient(160deg, #1a0030, #2a0050, #1a0030); border: 2.5px solid #7b2fff; border-radius: 28px; padding: 32px 24px 28px; text-align: center; box-shadow: 0 0 60px rgba(123,47,255,0.5); animation: popupEntry 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .recovery-title { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: clamp(1.2rem, 5vw, 1.6rem); font-weight: 900; color: #e040fb; text-transform: uppercase; letter-spacing: 0.05em; margin: 10px 0 8px; line-height: 1.2; }
+        .recovery-msg { font-size: 0.95rem; color: #ce93d8; font-weight: 600; margin-bottom: 12px; }
+        .recovery-pts { background: rgba(123,47,255,0.2); border: 1px solid rgba(123,47,255,0.4); border-radius: 10px; padding: 8px 16px; font-size: 1.1rem; font-weight: 900; color: #fff; margin-bottom: 20px; display: inline-block; }
+        .recovery-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .recovery-btn { flex: 1; min-width: 120px; max-width: 170px; padding: 13px 10px; font-size: 0.9rem; font-weight: 800; border: none; border-radius: 14px; cursor: pointer; font-family: 'Bricolage Grotesque', system-ui, sans-serif; transition: transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; letter-spacing: 0.02em; }
+        .recovery-btn:active { transform: scale(0.95); }
+        .recovery-no-btn { background: rgba(255,255,255,0.1); color: #ce93d8; border: 1.5px solid rgba(255,255,255,0.2); }
+        .recovery-no-btn:hover { background: rgba(255,255,255,0.18); }
+        .recovery-yes-btn { background: linear-gradient(135deg, #4a0080, #6a0dad); color: white; box-shadow: 0 4px 14px rgba(106,13,173,0.5); }
+        .recovery-yes-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(106,13,173,0.6); }
+
+        /* === AD WATCHING MODAL === */
+        .ad-watching-overlay { background: rgba(0,0,0,0.9); z-index: 10000; }
+        .ad-watching-popup { width: min(92vw, 340px); background: #1a1a2e; border: 2px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 36px 28px 28px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6); animation: popupEntry 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .ad-watching-label { font-size: 0.8rem; font-weight: 700; color: #90a4ae; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; }
+        .ad-watching-countdown { font-size: 4rem; font-weight: 900; color: #fff; line-height: 1; margin-bottom: 12px; font-family: 'Bricolage Grotesque', system-ui, sans-serif; }
+        .ad-countdown-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+        .ad-countdown-fill { height: 100%; background: linear-gradient(90deg, #6a0dad, #e040fb); border-radius: 999px; transition: width 1s linear; }
+        .ad-watching-msg { font-size: 0.85rem; color: #78909c; font-weight: 600; margin-bottom: 20px; }
+        .ad-skip-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #78909c; border-radius: 10px; padding: 8px 20px; font-size: 0.8rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+        .ad-skip-btn:hover { background: rgba(255,255,255,0.08); color: #b0bec5; }
+
+        /* === AD TOAST === */
+        .ad-toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #4a0080, #6a0dad); color: white; font-size: 0.9rem; font-weight: 800; padding: 12px 22px; border-radius: 999px; box-shadow: 0 6px 24px rgba(106,13,173,0.5); z-index: 9997; animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; white-space: nowrap; max-width: 90vw; text-align: center; }
       `}</style>
     </div>
   );
