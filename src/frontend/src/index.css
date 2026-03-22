@@ -271,3 +271,28 @@
   );
   border-top: 1px solid oklch(0.82 0.18 80 / 0.2);
 }
+
+/* === GAME BUTTON ANIMATIONS === */
+@keyframes goldPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px oklch(0.82 0.18 85 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 28px oklch(0.88 0.22 85 / 1);
+  }
+}
+@keyframes fishSwim {
+  0% {
+    transform: translateX(-20px);
+  }
+  100% {
+    transform: translateX(20px);
+  }
+}
+.animate-gold-pulse {
+  animation: goldPulse 2s ease-in-out infinite;
+}
+.animate-fish-swim {
+  animation: fishSwim 1s ease-in-out alternate infinite;
+}

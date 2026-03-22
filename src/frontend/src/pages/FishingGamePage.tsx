@@ -1,3 +1,6 @@
+import { FloatingBoostButton } from "@/components/FloatingBoostButton";
+import { GameBottomNav } from "@/components/GameBottomNav";
+import { GameButtonsPanel } from "@/components/GameButtonsPanel";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -590,7 +593,7 @@ export default function FishingGamePage() {
   );
 
   return (
-    <div className="fishing-game-root">
+    <div className="fishing-game-root pb-20">
       <header className="fishing-header">
         <div className="fishing-title">🎣 Florida Dave's Pier Fishing</div>
         <div className="fishing-header-right">
@@ -1499,6 +1502,9 @@ export default function FishingGamePage() {
         /* === AD TOAST === */
         .ad-toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #4a0080, #6a0dad); color: white; font-size: 0.9rem; font-weight: 800; padding: 12px 22px; border-radius: 999px; box-shadow: 0 6px 24px rgba(106,13,173,0.5); z-index: 9997; animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; white-space: nowrap; max-width: 90vw; text-align: center; }
       `}</style>
+      <GameButtonsPanel />
+      <GameBottomNav />
+      <FloatingBoostButton />
     </div>
   );
 }

@@ -1,40 +1,34 @@
-# Florida Dave Fishing Game – Leaderboard System
+# Florida Dave Pier Fishing — Game UI Buttons Panel
 
 ## Current State
-The fishing game (FishingGamePage.tsx) has a Kraken Risk System with banked points and current points tracked in component state. There is no leaderboard, no score submission, and no persistence across sessions. All state is lost on refresh.
+FishingGamePage.tsx contains the full fishing mini-game with Kraken Risk System, leaderboard, reset, and simulated rewarded ad buttons. The game uses a Florida beach theme with ocean colors.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Leaderboard data persistence using localStorage (keyed per app)
-- LeaderboardPage component at `/leaderboard` route showing top 10 players ranked by banked points
-- "View Leaderboard" button on the fishing game main screen
-- New High Score popup: shown when session ends (player resets or game over) and new banked points exceed stored personal high score
-  - Title: "🎉 NEW HIGH SCORE!"
-  - Subtext: "Submit your score to the leaderboard?"
-  - Input for player name (with random fallback: FishMaster, PierLegend, KrakenHunter, etc.)
-  - "Submit Score" and "Skip" buttons
-- Leaderboard display:
-  - Title: "🏆 Florida Dave Pier Leaderboard"
-  - Top 10 entries with rank, player name, banked points
-  - Gold/silver/bronze styling for top 3; #1 player visually prominent
-  - Mobile-friendly, Florida beach theme
-- New route in App.tsx for leaderboard page
+- New `GameButtonsPanel` component with 6 arcade-style game UI buttons:
+  1. 🎣 Get Lucky Boost (featured, glowing gold, floating FAB)
+  2. 💰 Double Coins
+  3. 😂 Roast Me / Bless Me (split/dual style)
+  4. 🎰 Spin the Dave Wheel
+  5. 🏆 VIP Fisher (black + gold premium)
+  6. 🐟 Legendary Hunt
+- Click popups with fun Florida Dave personality text for each button
+- Bottom navigation bar with: Fish, Shop, Leaderboard, Cameo tabs
+- Floating action button for "Get Lucky Boost" fixed at bottom-right
+- Dark blue + gold glow color scheme for buttons
+- Hover glow, pulse animations, and press feedback on all buttons
 
 ### Modify
-- FishingGamePage: track when banked points represent a new personal high score; trigger submission popup on game reset or when player explicitly wants to submit
-- Add a "View Leaderboard" button in the game UI (near cast button area)
-- Score submission: compare current session's peak banked points against stored leaderboard entries for the same player name
+- FishingGamePage.tsx — integrate GameButtonsPanel section below existing game controls; add bottom nav bar; ensure pb-20 padding for bottom nav clearance
 
 ### Remove
 - Nothing removed
 
 ## Implementation Plan
-1. Create leaderboard utility (src/frontend/src/lib/leaderboard.ts) with read/write functions using localStorage
-2. Create LeaderboardPage component (src/frontend/src/pages/LeaderboardPage.tsx) with full UI
-3. Add leaderboard route to App.tsx
-4. Modify FishingGamePage to:
-   - Track peak banked points during a session
-   - Show high score submission popup when appropriate
-   - Add "View Leaderboard" button
-5. High score check: when banked points increase, compare to top leaderboard entry for that device; if higher, mark as new high score candidate
+1. Create `src/frontend/src/components/GameButtonsPanel.tsx` with all 6 buttons, popup dialogs, and arcade animations
+2. Create `src/frontend/src/components/GameBottomNav.tsx` with Fish/Shop/Leaderboard/Cameo tabs fixed at bottom
+3. Create `src/frontend/src/components/FloatingBoostButton.tsx` for the floating Get Lucky Boost FAB
+4. Integrate all three into FishingGamePage.tsx
+5. Add CSS keyframe animations (gold pulse, glow, shimmer) to index.css
+6. Update tailwind config with dark blue + gold design tokens if needed
