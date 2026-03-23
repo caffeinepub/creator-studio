@@ -223,6 +223,18 @@ export default function PierRewardsPage() {
         >
           Support Florida Dave &amp; unlock powerful boosts!
         </motion.p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.28 }}
+          className="text-xs font-bold tracking-wider mt-2"
+          style={{
+            color: "oklch(0.85 0.18 85)",
+            textShadow: "0 0 8px oklch(0.82 0.18 85 / 0.5)",
+          }}
+        >
+          ⚡ Limited-time boosts — don't miss out!
+        </motion.p>
       </header>
 
       {/* Reward Cards */}

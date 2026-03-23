@@ -119,6 +119,30 @@ const CATCH_POOL: Array<Catch & { weight: number }> = [
     weight: 16,
   },
   {
+    emoji: "🦁",
+    name: "Lionfish",
+    description: "Beautiful but deadly — watch those spines!",
+    points: 35,
+    rarity: "rare",
+    weight: 5,
+  },
+  {
+    emoji: "🐋",
+    name: "Stingray",
+    description: "Gliding under the pier like it owns the place.",
+    points: 30,
+    rarity: "uncommon",
+    weight: 7,
+  },
+  {
+    emoji: "🐟",
+    name: "Tuna",
+    description: "Fresh catch — sushi-grade right off the pier!",
+    points: 40,
+    rarity: "rare",
+    weight: 6,
+  },
+  {
     emoji: "💰",
     name: "Treasure Chest",
     description: "Arrr! Jackpot!",
@@ -130,8 +154,24 @@ const CATCH_POOL: Array<Catch & { weight: number }> = [
 
 const TOTAL_WEIGHT = CATCH_POOL.reduce((s, c) => s + c.weight, 0);
 
-function getRandomCatch(): Catch {
+function getRandomCatch(luckycast = false, rareFishBoost = false): Catch {
   if (Math.random() < 1 / 500) return GOLDEN_FISH;
+  if (luckycast || rareFishBoost) {
+    const pool = CATCH_POOL.map((c) => {
+      let w = c.weight;
+      if (c.rarity === "rare" || c.rarity === "legendary") {
+        w = luckycast ? w * 4 : w * 3;
+      }
+      return { ...c, weight: w };
+    });
+    const total = pool.reduce((s, c) => s + c.weight, 0);
+    let r = Math.random() * total;
+    for (const c of pool) {
+      r -= c.weight;
+      if (r <= 0) return c;
+    }
+    return pool[0];
+  }
   let r = Math.random() * TOTAL_WEIGHT;
   for (const c of CATCH_POOL) {
     r -= c.weight;
@@ -293,6 +333,31 @@ export default function FishingGamePage() {
   const [adToast, setAdToast] = useState<string | null>(null);
   const adCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Reward bonus state
+  const [doubleCoinsEnd, setDoubleCoinsEnd] = useState<number | null>(() => {
+    const stored = localStorage.getItem("doubleCoinsEnd");
+    if (stored) {
+      const end = Number.parseInt(stored, 10);
+      return end > Date.now() ? end : null;
+    }
+    return null;
+  });
+  const [doubleCoinsActive, setDoubleCoinsActive] = useState<boolean>(() => {
+    const stored = localStorage.getItem("doubleCoinsEnd");
+    if (stored) {
+      const end = Number.parseInt(stored, 10);
+      return end > Date.now();
+    }
+    return false;
+  });
+  const [luckycastActive, setLuckycastActive] = useState(false);
+  const [luckycastCasts, setLuckycastCasts] = useState(0);
+  const [vipActive, setVipActive] = useState(false);
+  const [rareFishBoostActive, setRareFishBoostActive] = useState(false);
+  const [rareFishBoostEnd, setRareFishBoostEnd] = useState<number | null>(null);
+  const [coinRushActive, setCoinRushActive] = useState(false);
+  const [coinRushEnd, setCoinRushEnd] = useState<number | null>(null);
+
   // Cameo reward modal state
   const [cameoModalOpen, setCameoModalOpen] = useState(false);
   const [cameoCooldownEnd, setCameoCooldownEnd] = useState<number | null>(
@@ -307,6 +372,28 @@ export default function FishingGamePage() {
   );
   const [cameoCooldownDisplay, setCameoCooldownDisplay] = useState("");
   const [cameoToast, setCameoToast] = useState<string | null>(null);
+  const [showLegendaryReward, setShowLegendaryReward] = useState(false);
+
+  // Bonus expiry timer
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      if (doubleCoinsEnd && now > doubleCoinsEnd) {
+        setDoubleCoinsActive(false);
+        setDoubleCoinsEnd(null);
+        localStorage.removeItem("doubleCoinsEnd");
+      }
+      if (rareFishBoostEnd && now > rareFishBoostEnd) {
+        setRareFishBoostActive(false);
+        setRareFishBoostEnd(null);
+      }
+      if (coinRushEnd && now > coinRushEnd) {
+        setCoinRushActive(false);
+        setCoinRushEnd(null);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [doubleCoinsEnd, rareFishBoostEnd, coinRushEnd]);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -447,7 +534,16 @@ export default function FishingGamePage() {
       setGameState("waiting");
       const biteDelay = 2000 + Math.random() * 3000;
       timerRef.current = setTimeout(() => {
-        catchRef.current = getRandomCatch();
+        catchRef.current = getRandomCatch(luckycastActive, rareFishBoostActive);
+        if (luckycastActive) {
+          const remaining = luckycastCasts - 1;
+          if (remaining <= 0) {
+            setLuckycastActive(false);
+            setLuckycastCasts(0);
+          } else {
+            setLuckycastCasts(remaining);
+          }
+        }
         setReelCountdown(3);
         setGameState("biting");
         let count = 3;
@@ -482,6 +578,17 @@ export default function FishingGamePage() {
           boosted = true;
           showAdToast("⚡ 2x Catch Boost applied!");
         }
+        if (doubleCoinsActive) {
+          pts = pts * 2;
+          boosted = true;
+        }
+        if (coinRushActive) {
+          pts = Math.ceil(pts * 1.5);
+          boosted = true;
+        }
+        if (vipActive) {
+          pts = Math.ceil(pts * 1.1);
+        }
         setScore((s) => s + pts);
         addCatchToLog(caught, boosted);
         setLastCatch(caught);
@@ -496,6 +603,17 @@ export default function FishingGamePage() {
         setHasBonusCatch(false);
         boosted = true;
         showAdToast("⚡ 2x Catch Boost applied!");
+      }
+      if (doubleCoinsActive) {
+        pts = pts * 2;
+        boosted = true;
+      }
+      if (coinRushActive) {
+        pts = Math.ceil(pts * 1.5);
+        boosted = true;
+      }
+      if (vipActive) {
+        pts = Math.ceil(pts * 1.1);
       }
       setLastCatch(caught);
       setScore((s) => s + pts);
@@ -664,6 +782,97 @@ export default function FishingGamePage() {
               </div>
             )}
           </div>
+          {(doubleCoinsActive ||
+            luckycastActive ||
+            vipActive ||
+            rareFishBoostActive ||
+            coinRushActive) && (
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px",
+                padding: "4px 12px 8px",
+                justifyContent: "center",
+              }}
+            >
+              {doubleCoinsActive && (
+                <span
+                  style={{
+                    background: "rgba(251,191,36,0.25)",
+                    border: "1px solid #fbbf24",
+                    borderRadius: "12px",
+                    padding: "2px 10px",
+                    fontSize: "0.75rem",
+                    color: "#fbbf24",
+                    fontWeight: 700,
+                  }}
+                >
+                  ⚡ Double Coins active
+                </span>
+              )}
+              {luckycastActive && (
+                <span
+                  style={{
+                    background: "rgba(134,239,172,0.2)",
+                    border: "1px solid #86efac",
+                    borderRadius: "12px",
+                    padding: "2px 10px",
+                    fontSize: "0.75rem",
+                    color: "#86efac",
+                    fontWeight: 700,
+                  }}
+                >
+                  🍀 LUCKY CAST ({luckycastCasts}x)
+                </span>
+              )}
+              {vipActive && (
+                <span
+                  style={{
+                    background: "rgba(251,191,36,0.25)",
+                    border: "1px solid #fbbf24",
+                    borderRadius: "12px",
+                    padding: "2px 10px",
+                    fontSize: "0.75rem",
+                    color: "#fbbf24",
+                    fontWeight: 700,
+                  }}
+                >
+                  👑 VIP
+                </span>
+              )}
+              {rareFishBoostActive && (
+                <span
+                  style={{
+                    background: "rgba(251,191,36,0.2)",
+                    border: "1px solid #fb923c",
+                    borderRadius: "12px",
+                    padding: "2px 10px",
+                    fontSize: "0.75rem",
+                    color: "#fb923c",
+                    fontWeight: 700,
+                  }}
+                >
+                  🐟 RARE BOOST
+                </span>
+              )}
+              {coinRushActive && (
+                <span
+                  style={{
+                    background: "rgba(134,239,172,0.2)",
+                    border: "1px solid #4ade80",
+                    borderRadius: "12px",
+                    padding: "2px 10px",
+                    fontSize: "0.75rem",
+                    color: "#4ade80",
+                    fontWeight: 700,
+                  }}
+                >
+                  💰 COIN RUSH
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -1538,6 +1747,28 @@ export default function FishingGamePage() {
         .ad-skip-btn:hover { background: rgba(255,255,255,0.08); color: #b0bec5; }
 
         /* === AD TOAST === */
+        @keyframes legendaryPulse {
+          0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+          40% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+          70% { transform: translate(-50%, -50%) scale(0.97); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        @keyframes legendaryFadeOut {
+          0% { opacity: 1; }
+          100% { opacity: 0; pointer-events: none; }
+        }
+        @keyframes sparkleFloat {
+          0% { transform: translateY(0) scale(1); opacity: 1; }
+          100% { transform: translateY(-80px) scale(0.3); opacity: 0; }
+        }
+        @keyframes rayRotate {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes glowPulse {
+          0%, 100% { text-shadow: 0 0 30px #fbbf24, 0 0 60px #f59e0b, 0 0 90px #d97706; }
+          50% { text-shadow: 0 0 60px #fbbf24, 0 0 120px #f59e0b, 0 0 180px #fde68a; }
+        }
         .ad-toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #4a0080, #6a0dad); color: white; font-size: 0.9rem; font-weight: 800; padding: 12px 22px; border-radius: 999px; box-shadow: 0 6px 24px rgba(106,13,173,0.5); z-index: 9997; animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; white-space: nowrap; max-width: 90vw; text-align: center; }
       `}</style>
       <GameButtonsPanel />
@@ -1662,47 +1893,81 @@ export default function FishingGamePage() {
                   emoji: "⚡",
                   label: "Double Coins",
                   action: () => {
-                    setHasBonusCatch(true);
-                    return "⚡ DOUBLE COINS ACTIVATED! Next catch is 2x!";
+                    const end = Date.now() + 10 * 60 * 1000;
+                    setDoubleCoinsActive(true);
+                    setDoubleCoinsEnd(end);
+                    localStorage.setItem("doubleCoinsEnd", String(end));
+                    return "⚡ DOUBLE COINS ACTIVATED! 2x coins for 10 minutes!";
                   },
                 },
                 {
                   emoji: "🍀",
                   label: "Lucky Cast",
-                  action: () => "🍀 LUCKY CAST ACTIVE! Better odds incoming!",
+                  action: () => {
+                    setLuckycastActive(true);
+                    setLuckycastCasts(10);
+                    return "🍀 LUCKY CAST ACTIVE! Better rare fish odds for 10 casts!";
+                  },
                 },
                 {
                   emoji: "👑",
                   label: "VIP Fisher",
-                  action: () => "👑 VIP FISHER UNLOCKED! Fish like a legend!",
+                  action: () => {
+                    setVipActive(true);
+                    return "👑 VIP FISHER UNLOCKED! You're fishing like a legend!";
+                  },
                 },
                 {
                   emoji: "🐟",
                   label: "Rare Fish Boost",
-                  action: () => "🐟 RARE FISH BOOST ACTIVE!",
+                  action: () => {
+                    const end = Date.now() + 5 * 60 * 1000;
+                    setRareFishBoostActive(true);
+                    setRareFishBoostEnd(end);
+                    return "🐟 RARE FISH BOOST ACTIVE! Rare spawns increased for 5 minutes!";
+                  },
                 },
                 {
                   emoji: "💰",
                   label: "Coin Rush",
-                  action: () => "💰 COIN RUSH ACTIVE! Earn faster!",
+                  action: () => {
+                    const end = Date.now() + 5 * 60 * 1000;
+                    setCoinRushActive(true);
+                    setCoinRushEnd(end);
+                    return "💰 COIN RUSH ACTIVE! +50% coins per catch for 5 minutes!";
+                  },
                 },
                 {
                   emoji: "🎁",
                   label: "Mystery Bonus",
                   action: () => {
-                    const choices = [
-                      () => {
-                        setHasBonusCatch(true);
-                        return "⚡ MYSTERY: DOUBLE COINS ACTIVATED!";
-                      },
-                      () => "🍀 MYSTERY: LUCKY CAST ACTIVE!",
-                      () => "👑 MYSTERY: VIP FISHER UNLOCKED!",
-                      () => "🐟 MYSTERY: RARE FISH BOOST ACTIVE!",
-                      () => "💰 MYSTERY: COIN RUSH ACTIVE!",
-                    ];
-                    return choices[
-                      Math.floor(Math.random() * choices.length)
-                    ]();
+                    const roll = Math.floor(Math.random() * 5);
+                    if (roll === 0) {
+                      const end = Date.now() + 10 * 60 * 1000;
+                      setDoubleCoinsActive(true);
+                      setDoubleCoinsEnd(end);
+                      localStorage.setItem("doubleCoinsEnd", String(end));
+                      return "⚡ MYSTERY: DOUBLE COINS! 2x coins for 10 minutes!";
+                    }
+                    if (roll === 1) {
+                      setLuckycastActive(true);
+                      setLuckycastCasts(10);
+                      return "🍀 MYSTERY: LUCKY CAST! Better rare fish for 10 casts!";
+                    }
+                    if (roll === 2) {
+                      setVipActive(true);
+                      return "👑 MYSTERY: VIP FISHER UNLOCKED!";
+                    }
+                    if (roll === 3) {
+                      const end = Date.now() + 5 * 60 * 1000;
+                      setRareFishBoostActive(true);
+                      setRareFishBoostEnd(end);
+                      return "🐟 MYSTERY: RARE FISH BOOST! 5 minutes!";
+                    }
+                    const end = Date.now() + 5 * 60 * 1000;
+                    setCoinRushActive(true);
+                    setCoinRushEnd(end);
+                    return "💰 MYSTERY: COIN RUSH! +50% coins for 5 minutes!";
                   },
                 },
               ].map(({ emoji, label, action }) => (
@@ -1718,6 +1983,8 @@ export default function FishingGamePage() {
                     setCameoCooldownEnd(end);
                     localStorage.setItem("cameoCooldownEnd", String(end));
                     setCameoModalOpen(false);
+                    setShowLegendaryReward(true);
+                    setTimeout(() => setShowLegendaryReward(false), 3200);
                   }}
                   style={{
                     background: "linear-gradient(135deg, #0d1b2a, #1e3a5f)",
@@ -1801,6 +2068,119 @@ export default function FishingGamePage() {
           }}
         >
           {cameoToast}
+        </div>
+      )}
+      {showLegendaryReward && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.82)",
+            zIndex: 10100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "legendaryFadeOut 0.5s ease-in 2.7s both",
+          }}
+        >
+          {/* Rotating light rays */}
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              width: "600px",
+              height: "600px",
+              background:
+                "conic-gradient(from 0deg, transparent 0deg, rgba(251,191,36,0.12) 10deg, transparent 20deg, rgba(251,191,36,0.08) 30deg, transparent 40deg)",
+              borderRadius: "50%",
+              animation: "rayRotate 3s linear infinite",
+              pointerEvents: "none",
+            }}
+          />
+          {/* Sparkle particles */}
+          {[
+            { top: "25%", left: "20%", delay: "0s", size: "1.4rem" },
+            { top: "20%", left: "50%", delay: "0.1s", size: "1.2rem" },
+            { top: "25%", left: "80%", delay: "0.15s", size: "1.5rem" },
+            { top: "50%", left: "12%", delay: "0.2s", size: "1.1rem" },
+            { top: "50%", left: "88%", delay: "0.05s", size: "1.3rem" },
+            { top: "72%", left: "22%", delay: "0.25s", size: "1.4rem" },
+            { top: "75%", left: "50%", delay: "0.1s", size: "1.1rem" },
+            { top: "72%", left: "78%", delay: "0.18s", size: "1.5rem" },
+          ].map((s, _i) => (
+            <div
+              key={`sparkle-${s.top}-${s.left}`}
+              style={{
+                position: "absolute",
+                top: s.top,
+                left: s.left,
+                fontSize: s.size,
+                animation: `sparkleFloat 1.6s ease-out ${s.delay} infinite`,
+                pointerEvents: "none",
+              }}
+            >
+              ✨
+            </div>
+          ))}
+          {/* Main card */}
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              animation:
+                "legendaryPulse 0.6s cubic-bezier(0.34,1.56,0.64,1) both",
+              textAlign: "center",
+              padding: "40px 32px",
+              background:
+                "linear-gradient(160deg, #0d1b2a 0%, #1a3a0a 50%, #0d1b2a 100%)",
+              border: "3px solid #fbbf24",
+              borderRadius: "28px",
+              boxShadow:
+                "0 0 60px rgba(251,191,36,0.6), 0 0 120px rgba(251,191,36,0.3), 0 20px 60px rgba(0,0,0,0.8)",
+              maxWidth: "min(90vw, 380px)",
+              width: "min(90vw, 380px)",
+            }}
+          >
+            <div style={{ fontSize: "3.5rem", marginBottom: "8px" }}>🎉</div>
+            <div
+              style={{
+                fontSize: "clamp(1.2rem, 5vw, 1.8rem)",
+                fontWeight: 900,
+                color: "#fbbf24",
+                letterSpacing: "0.06em",
+                fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+                lineHeight: 1.2,
+                animation: "glowPulse 1s ease-in-out infinite",
+                marginBottom: "10px",
+              }}
+            >
+              LEGENDARY SUPPORT!
+            </div>
+            <div
+              style={{
+                fontSize: "clamp(1rem, 4vw, 1.4rem)",
+                fontWeight: 800,
+                color: "#34d399",
+                letterSpacing: "0.04em",
+                fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+                textShadow:
+                  "0 0 20px rgba(52,211,153,0.7), 0 0 40px rgba(52,211,153,0.4)",
+              }}
+            >
+              REWARD ACTIVATED!
+            </div>
+            <div
+              style={{
+                marginTop: "16px",
+                fontSize: "1.5rem",
+                letterSpacing: "0.2em",
+              }}
+            >
+              🌊🎣🏆🎣🌊
+            </div>
+          </div>
         </div>
       )}
     </div>
