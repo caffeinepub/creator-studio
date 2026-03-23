@@ -11,6 +11,7 @@ import FishingGamePage from "./pages/FishingGamePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import OwnerDashboardPage from "./pages/OwnerDashboardPage";
 import PierGearPage from "./pages/PierGearPage";
+import PierRewardsPage from "./pages/PierRewardsPage";
 import ProfilePage from "./pages/ProfilePage";
 import UploadVideoPage from "./pages/UploadVideoPage";
 import VideoFeedPage from "./pages/VideoFeedPage";
@@ -72,6 +73,12 @@ const leaderboardRoute = createRoute({
   component: LeaderboardPage,
 });
 
+const pierRewardsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pier-rewards",
+  component: PierRewardsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   profileRoute,
@@ -81,6 +88,7 @@ const routeTree = rootRoute.addChildren([
   fishingRoute,
   pierGearRoute,
   leaderboardRoute,
+  pierRewardsRoute,
 ]);
 
 const router = createRouter({ routeTree });

@@ -293,6 +293,21 @@ export default function FishingGamePage() {
   const [adToast, setAdToast] = useState<string | null>(null);
   const adCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Cameo reward modal state
+  const [cameoModalOpen, setCameoModalOpen] = useState(false);
+  const [cameoCooldownEnd, setCameoCooldownEnd] = useState<number | null>(
+    () => {
+      const stored = localStorage.getItem("cameoCooldownEnd");
+      if (stored) {
+        const end = Number.parseInt(stored, 10);
+        return end > Date.now() ? end : null;
+      }
+      return null;
+    },
+  );
+  const [cameoCooldownDisplay, setCameoCooldownDisplay] = useState("");
+  const [cameoToast, setCameoToast] = useState<string | null>(null);
+
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const catchRef = useRef<Catch | null>(null);
@@ -338,6 +353,29 @@ export default function FishingGamePage() {
       }
     });
   }, [bankedPoints, unlockedMilestones]);
+
+  // Cooldown timer for Cameo button
+  useEffect(() => {
+    if (!cameoCooldownEnd) {
+      setCameoCooldownDisplay("");
+      return;
+    }
+    const tick = () => {
+      const remaining = cameoCooldownEnd - Date.now();
+      if (remaining <= 0) {
+        setCameoCooldownEnd(null);
+        localStorage.removeItem("cameoCooldownEnd");
+        setCameoCooldownDisplay("");
+        return;
+      }
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      setCameoCooldownDisplay(`${m}:${s.toString().padStart(2, "0")}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [cameoCooldownEnd]);
 
   function showAdToast(msg: string) {
     setAdToast(msg);
@@ -1505,6 +1543,266 @@ export default function FishingGamePage() {
       <GameButtonsPanel />
       <GameBottomNav />
       <FloatingBoostButton />
+
+      {/* === I GOT MY CAMEO BUTTON === */}
+      <button
+        type="button"
+        data-ocid="cameo.open_modal_button"
+        onClick={() => {
+          if (!cameoCooldownEnd) setCameoModalOpen(true);
+        }}
+        disabled={!!cameoCooldownEnd}
+        style={{
+          position: "fixed",
+          bottom: "72px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 9990,
+          width: "min(92vw, 320px)",
+          padding: "14px 20px",
+          borderRadius: "999px",
+          border: "2px solid #f59e0b",
+          background: cameoCooldownEnd
+            ? "rgba(30,41,59,0.85)"
+            : "linear-gradient(135deg, #0d1b2a, #1e3a5f)",
+          color: cameoCooldownEnd ? "#94a3b8" : "#fbbf24",
+          fontWeight: 800,
+          fontSize: "1rem",
+          cursor: cameoCooldownEnd ? "not-allowed" : "pointer",
+          boxShadow: cameoCooldownEnd
+            ? "none"
+            : "0 0 18px rgba(251,191,36,0.5), 0 4px 16px rgba(0,0,0,0.4)",
+          fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+          letterSpacing: "0.04em",
+          transition: "all 0.2s",
+          textAlign: "center",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {cameoCooldownEnd
+          ? `🎥 Claimed! Cooldown: ${cameoCooldownDisplay}`
+          : "🎥 I GOT MY CAMEO"}
+      </button>
+
+      {/* === CAMEO REWARD MODAL === */}
+      {cameoModalOpen && (
+        <div
+          data-ocid="cameo.modal"
+          role="presentation"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.85)",
+            zIndex: 10010,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setCameoModalOpen(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setCameoModalOpen(false);
+          }}
+        >
+          <div
+            style={{
+              background: "linear-gradient(160deg, #0d1b2a 0%, #0f2744 100%)",
+              border: "2px solid #f59e0b",
+              borderRadius: "24px",
+              padding: "28px 24px 20px",
+              width: "min(94vw, 380px)",
+              boxShadow:
+                "0 0 40px rgba(251,191,36,0.25), 0 20px 60px rgba(0,0,0,0.7)",
+              animation: "popupEntry 0.3s cubic-bezier(0.34,1.56,0.64,1) both",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+          >
+            <div style={{ textAlign: "center", marginBottom: "16px" }}>
+              <div
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 900,
+                  color: "#fbbf24",
+                  letterSpacing: "0.04em",
+                  fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+                  textShadow: "0 0 16px rgba(251,191,36,0.5)",
+                }}
+              >
+                🎉 CLAIM YOUR REWARD
+              </div>
+              <div
+                style={{
+                  color: "#94a3b8",
+                  fontSize: "0.85rem",
+                  marginTop: "8px",
+                  lineHeight: 1.5,
+                }}
+              >
+                Thank you for supporting Florida Dave!
+                <br />
+                <strong style={{ color: "#cbd5e1" }}>
+                  Choose the reward you unlocked:
+                </strong>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+                marginBottom: "16px",
+              }}
+            >
+              {[
+                {
+                  emoji: "⚡",
+                  label: "Double Coins",
+                  action: () => {
+                    setHasBonusCatch(true);
+                    return "⚡ DOUBLE COINS ACTIVATED! Next catch is 2x!";
+                  },
+                },
+                {
+                  emoji: "🍀",
+                  label: "Lucky Cast",
+                  action: () => "🍀 LUCKY CAST ACTIVE! Better odds incoming!",
+                },
+                {
+                  emoji: "👑",
+                  label: "VIP Fisher",
+                  action: () => "👑 VIP FISHER UNLOCKED! Fish like a legend!",
+                },
+                {
+                  emoji: "🐟",
+                  label: "Rare Fish Boost",
+                  action: () => "🐟 RARE FISH BOOST ACTIVE!",
+                },
+                {
+                  emoji: "💰",
+                  label: "Coin Rush",
+                  action: () => "💰 COIN RUSH ACTIVE! Earn faster!",
+                },
+                {
+                  emoji: "🎁",
+                  label: "Mystery Bonus",
+                  action: () => {
+                    const choices = [
+                      () => {
+                        setHasBonusCatch(true);
+                        return "⚡ MYSTERY: DOUBLE COINS ACTIVATED!";
+                      },
+                      () => "🍀 MYSTERY: LUCKY CAST ACTIVE!",
+                      () => "👑 MYSTERY: VIP FISHER UNLOCKED!",
+                      () => "🐟 MYSTERY: RARE FISH BOOST ACTIVE!",
+                      () => "💰 MYSTERY: COIN RUSH ACTIVE!",
+                    ];
+                    return choices[
+                      Math.floor(Math.random() * choices.length)
+                    ]();
+                  },
+                },
+              ].map(({ emoji, label, action }) => (
+                <button
+                  key={label}
+                  type="button"
+                  data-ocid={`cameo.${label.toLowerCase().replace(/\s+/g, "_")}.button`}
+                  onClick={() => {
+                    const msg = action();
+                    setCameoToast(msg);
+                    setTimeout(() => setCameoToast(null), 3500);
+                    const end = Date.now() + 10 * 60 * 1000;
+                    setCameoCooldownEnd(end);
+                    localStorage.setItem("cameoCooldownEnd", String(end));
+                    setCameoModalOpen(false);
+                  }}
+                  style={{
+                    background: "linear-gradient(135deg, #0d1b2a, #1e3a5f)",
+                    border: "1.5px solid #f59e0b",
+                    borderRadius: "14px",
+                    color: "#fbbf24",
+                    fontWeight: 800,
+                    fontSize: "0.85rem",
+                    padding: "14px 8px",
+                    cursor: "pointer",
+                    textAlign: "center",
+                    boxShadow: "0 0 10px rgba(251,191,36,0.2)",
+                    transition: "all 0.15s",
+                    fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  <div style={{ fontSize: "1.3rem" }}>{emoji}</div>
+                  <div>{label}</div>
+                </button>
+              ))}
+            </div>
+
+            <div
+              style={{
+                textAlign: "center",
+                color: "#64748b",
+                fontSize: "0.75rem",
+                marginBottom: "14px",
+              }}
+            >
+              Only claim if you ordered a Cameo 💙
+            </div>
+
+            <button
+              type="button"
+              data-ocid="cameo.cancel_button"
+              onClick={() => setCameoModalOpen(false)}
+              style={{
+                width: "100%",
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: "12px",
+                color: "#94a3b8",
+                padding: "10px",
+                cursor: "pointer",
+                fontSize: "0.9rem",
+                fontWeight: 700,
+                fontFamily: "inherit",
+              }}
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* === CAMEO TOAST === */}
+      {cameoToast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "140px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "linear-gradient(135deg, #0d1b2a, #1e3a5f)",
+            border: "1.5px solid #f59e0b",
+            color: "#fbbf24",
+            fontWeight: 800,
+            fontSize: "0.9rem",
+            padding: "12px 22px",
+            borderRadius: "999px",
+            boxShadow:
+              "0 0 20px rgba(251,191,36,0.4), 0 6px 24px rgba(0,0,0,0.5)",
+            zIndex: 10005,
+            animation: "toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both",
+            whiteSpace: "nowrap",
+            maxWidth: "90vw",
+            textAlign: "center",
+            fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+          }}
+        >
+          {cameoToast}
+        </div>
+      )}
     </div>
   );
 }

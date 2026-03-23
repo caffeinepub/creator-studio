@@ -1,14 +1,35 @@
-import { useState } from "react";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 const TABS = [
-  { id: "fish", label: "Fish", emoji: "🎣" },
-  { id: "shop", label: "Shop", emoji: "🛒" },
-  { id: "leaderboard", label: "Leaderboard", emoji: "🏆" },
-  { id: "cameo", label: "Cameo", emoji: "🎬" },
+  { id: "fish", label: "Fish", emoji: "🎣", path: "/fishing" },
+  { id: "shop", label: "Shop", emoji: "🛒", path: "/pier-gear" },
+  {
+    id: "leaderboard",
+    label: "Leaderboard",
+    emoji: "🏆",
+    path: "/leaderboard",
+  },
+  { id: "rewards", label: "Rewards", emoji: "🎁", path: "/pier-rewards" },
+  {
+    id: "cameo",
+    label: "Cameo",
+    emoji: "🎬",
+    path: "https://www.cameo.com/fortnitebuster",
+  },
 ];
 
 export function GameBottomNav() {
-  const [active, setActive] = useState("fish");
+  const navigate = useNavigate();
+  const { location } = useRouterState();
+  const currentPath = location.pathname;
+
+  function handleTab(tab: (typeof TABS)[0]) {
+    if (tab.path.startsWith("http")) {
+      window.open(tab.path, "_blank", "noopener,noreferrer");
+    } else {
+      navigate({ to: tab.path });
+    }
+  }
 
   return (
     <nav
@@ -24,13 +45,15 @@ export function GameBottomNav() {
       }}
     >
       {TABS.map((tab) => {
-        const isActive = active === tab.id;
+        const isActive = tab.path.startsWith("http")
+          ? false
+          : currentPath === tab.path;
         return (
           <button
             type="button"
             key={tab.id}
             data-ocid={`game_nav.${tab.id}.tab`}
-            onClick={() => setActive(tab.id)}
+            onClick={() => handleTab(tab)}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-all active:scale-90"
             style={{
               color: isActive ? "oklch(0.88 0.22 85)" : "oklch(0.55 0.06 230)",
