@@ -350,8 +350,14 @@ export default function FishingGamePage() {
     }
     return false;
   });
-  const [luckycastActive, setLuckycastActive] = useState(false);
-  const [luckycastCasts, setLuckycastCasts] = useState(0);
+  const [luckycastCasts, setLuckycastCasts] = useState<number>(() => {
+    const stored = localStorage.getItem("luckycastCasts");
+    return stored ? Number.parseInt(stored, 10) : 0;
+  });
+  const [luckycastActive, setLuckycastActive] = useState<boolean>(() => {
+    const stored = localStorage.getItem("luckycastCasts");
+    return stored ? Number.parseInt(stored, 10) > 0 : false;
+  });
   const [vipActive, setVipActive] = useState(false);
   const [rareFishBoostActive, setRareFishBoostActive] = useState(false);
   const [rareFishBoostEnd, setRareFishBoostEnd] = useState<number | null>(null);
@@ -540,8 +546,10 @@ export default function FishingGamePage() {
           if (remaining <= 0) {
             setLuckycastActive(false);
             setLuckycastCasts(0);
+            localStorage.removeItem("luckycastCasts");
           } else {
             setLuckycastCasts(remaining);
+            localStorage.setItem("luckycastCasts", String(remaining));
           }
         }
         setReelCountdown(3);
@@ -733,6 +741,9 @@ export default function FishingGamePage() {
     setShowHighScorePopup(false);
     setSubmittedToLeaderboard(false);
     setShowResetConfirm(false);
+    setLuckycastActive(false);
+    setLuckycastCasts(0);
+    localStorage.removeItem("luckycastCasts");
     // Ad system resets
     setKrakenShields(0);
     setHasBonusCatch(false);
@@ -823,7 +834,7 @@ export default function FishingGamePage() {
                     fontWeight: 700,
                   }}
                 >
-                  🍀 LUCKY CAST ({luckycastCasts}x)
+                  👉 Lucky Cast: {luckycastCasts} casts left 🎣
                 </span>
               )}
               {vipActive && (
@@ -1906,6 +1917,7 @@ export default function FishingGamePage() {
                   action: () => {
                     setLuckycastActive(true);
                     setLuckycastCasts(10);
+                    localStorage.setItem("luckycastCasts", "10");
                     return "🍀 LUCKY CAST ACTIVE! Better rare fish odds for 10 casts!";
                   },
                 },
@@ -1952,6 +1964,7 @@ export default function FishingGamePage() {
                     if (roll === 1) {
                       setLuckycastActive(true);
                       setLuckycastCasts(10);
+                      localStorage.setItem("luckycastCasts", "10");
                       return "🍀 MYSTERY: LUCKY CAST! Better rare fish for 10 casts!";
                     }
                     if (roll === 2) {
