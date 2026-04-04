@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft, Calendar, Eye } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGetVideo } from "../hooks/useQueries";
 
 function formatViewCount(count: bigint): string {
@@ -33,7 +33,41 @@ export default function VideoPlayerPage() {
   const { data: video, isLoading } = useGetVideo(id);
   const [videoError, setVideoError] = useState(false);
   const [videoLoading, setVideoLoading] = useState(true);
+  const [resolvedVideoUrl, setResolvedVideoUrl] = useState<string | undefined>(
+    undefined,
+  );
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!video) return;
+
+    setVideoLoading(true);
+    setVideoError(false);
+
+    let blobUrl: string | undefined;
+
+    (async () => {
+      try {
+        const bytes = await video.file.getBytes();
+        const blob = new Blob([bytes], { type: "video/mp4" });
+        blobUrl = URL.createObjectURL(blob);
+        setResolvedVideoUrl(blobUrl);
+      } catch {
+        try {
+          const directUrl = video.file.getDirectURL();
+          setResolvedVideoUrl(directUrl);
+        } catch {
+          setResolvedVideoUrl(undefined);
+        }
+      }
+    })();
+
+    return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [video]);
 
   const formatDate = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) / 1_000_000);
@@ -73,13 +107,6 @@ export default function VideoPlayerPage() {
     );
   }
 
-  let videoUrl: string | undefined;
-  try {
-    videoUrl = video.file.getDirectURL();
-  } catch {
-    videoUrl = undefined;
-  }
-
   const posterUrl = getPosterUrl(video);
 
   return (
@@ -95,7 +122,7 @@ export default function VideoPlayerPage() {
 
       <div className="bg-card rounded-lg overflow-hidden shadow-lg border-2 border-border">
         <div className="aspect-video bg-black relative">
-          {videoError || !videoUrl ? (
+          {videoError || !resolvedVideoUrl ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-3">
               <AlertCircle className="h-12 w-12 text-destructive" />
               <p className="text-lg font-semibold">Unable to load video</p>
@@ -130,8 +157,8 @@ export default function VideoPlayerPage() {
               )}
               <video
                 ref={videoRef}
-                key={videoUrl}
-                src={videoUrl}
+                key={resolvedVideoUrl}
+                src={resolvedVideoUrl}
                 controls
                 preload="auto"
                 playsInline
